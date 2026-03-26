@@ -1,0 +1,25 @@
+{
+  "id": "usa-2024-presidential",
+  "country": "United States",
+  "country_code": "US",
+  "election_name": "2024 US Presidential Election",
+  "election_type": "presidential",
+  "electoral_system": "electoral_college",
+  "date": "2024-11-05",
+  "languages": ["en", "es"],
+  "primary_language": "en",
+  "parties": [
+    {"id": "dem", "name": "Democratic Party", "short": "Dem", "colour": "#0015BC"},
+    {"id": "rep", "name": "Republican Party", "short": "Rep", "colour": "#FF0000"},
+    {"id": "lib", "name": "Libertarian Party", "short": "Lib", "colour": "#FED105"},
+    {"id": "grn", "name": "Green Party", "short": "Grn", "colour": "#17AA5C"},
+    {"id": "ind", "name": "Independent", "short": "Ind", "colour": "#808080"}
+  ],
+  "disclaimers": [
+    "The Electoral College means national popular sentiment does not directly determine the winner — swing state analysis is critical.",
+    "Social media sentiment may over-represent certain demographics and underrepresent others."
+  ],
+  "sentiment_models_recommended": ["bertweet", "roberta", "ensemble"],
+  "total_electoral_votes": 538,
+  "winning_threshold": 270
+}

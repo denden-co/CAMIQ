@@ -1,0 +1,26 @@
+{
+  "id": "uk-2024-ge",
+  "country": "United Kingdom",
+  "country_code": "GB",
+  "election_name": "2024 UK General Election",
+  "election_type": "general",
+  "electoral_system": "fptp",
+  "date": "2024-07-04",
+  "languages": ["en"],
+  "primary_language": "en",
+  "parties": [
+    {"id": "lab", "name": "Labour", "short": "Lab", "colour": "#E4003B"},
+    {"id": "con", "name": "Conservative", "short": "Con", "colour": "#0087DC"},
+    {"id": "lib", "name": "Liberal Democrats", "short": "LD", "colour": "#FAA61A"},
+    {"id": "ref", "name": "Reform UK", "short": "Ref", "colour": "#12B6CF"},
+    {"id": "grn", "name": "Green Party", "short": "Grn", "colour": "#6AB023"},
+    {"id": "snp", "name": "Scottish National Party", "short": "SNP", "colour": "#FDF38E"},
+    {"id": "pc", "name": "Plaid Cymru", "short": "PC", "colour": "#005B54"}
+  ],
+  "disclaimers": [
+    "FPTP systems translate vote share to seats non-linearly — national sentiment does not directly predict constituency-level outcomes.",
+    "Without MRP/constituency-level modelling, predictions should be treated as directional indicators, not seat forecasts."
+  ],
+  "sentiment_models_recommended": ["bertweet", "roberta", "ensemble"],
+  "total_constituencies": 650
+}

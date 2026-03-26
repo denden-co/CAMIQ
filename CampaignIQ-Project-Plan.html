@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampaignIQ — Project Roadmap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8f9fb; color: #1a1a2e; line-height: 1.6; }
+
+        .header { background: linear-gradient(135deg, #6c2bd9 0%, #c026d3 100%); color: white; padding: 48px 32px; text-align: center; }
+        .header h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 8px; }
+        .header .subtitle { font-size: 1.1rem; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+        .header .meta { margin-top: 16px; font-size: 0.9rem; opacity: 0.75; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+
+        .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 40px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center; }
+        .stat-card .number { font-size: 2rem; font-weight: 700; color: #6c2bd9; }
+        .stat-card .label { font-size: 0.85rem; color: #666; margin-top: 4px; }
+
+        .section { margin-bottom: 40px; }
+        .section h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; color: #1a1a2e; border-left: 4px solid #6c2bd9; padding-left: 12px; }
+        .section h3 { font-size: 1.15rem; font-weight: 600; margin: 20px 0 10px; color: #333; }
+
+        .arch-box { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .arch-box p { margin-bottom: 10px; color: #444; }
+
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+        .tech-tag { background: #f0e6ff; color: #6c2bd9; padding: 4px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; }
+        .tech-tag.green { background: #e6f9f0; color: #059669; }
+        .tech-tag.blue { background: #e0f2fe; color: #0369a1; }
+        .tech-tag.orange { background: #fff7ed; color: #c2410c; }
+
+        .phase { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; position: relative; overflow: hidden; }
+        .phase::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+        .phase.p1::before { background: #6c2bd9; }
+        .phase.p2::before { background: #c026d3; }
+        .phase.p3::before { background: #059669; }
+        .phase.p4::before { background: #0369a1; }
+        .phase.p5::before { background: #c2410c; }
+
+        .phase-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+        .phase-title { font-size: 1.15rem; font-weight: 700; }
+        .phase-duration { font-size: 0.82rem; background: #f3f4f6; padding: 4px 10px; border-radius: 8px; color: #555; }
+
+        .task-list { list-style: none; }
+        .task-list li { padding: 8px 0; border-bottom: 1px solid #f3f4f6; display: flex; align-items: flex-start; gap: 8px; }
+        .task-list li:last-child { border-bottom: none; }
+        .task-list .check { width: 18px; height: 18px; border: 2px solid #d1d5db; border-radius: 4px; flex-shrink: 0; margin-top: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        .task-list .check.done { background: #6c2bd9; border-color: #6c2bd9; color: white; }
+        .task-text { color: #444; font-size: 0.95rem; }
+        .task-text strong { color: #1a1a2e; }
+
+        .milestone { display: inline-block; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; margin-left: 6px; }
+
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+        .feature-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .feature-card h4 { font-size: 1rem; margin-bottom: 8px; color: #1a1a2e; }
+        .feature-card p { font-size: 0.9rem; color: #555; }
+        .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+
+        .risk-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .risk-table th { background: #f8f5ff; text-align: left; padding: 12px 16px; font-size: 0.85rem; color: #6c2bd9; font-weight: 600; }
+        .risk-table td { padding: 12px 16px; border-top: 1px solid #f3f4f6; font-size: 0.9rem; color: #444; }
+        .risk-high { color: #dc2626; font-weight: 600; }
+        .risk-med { color: #d97706; font-weight: 600; }
+        .risk-low { color: #059669; font-weight: 600; }
+
+        .footer { text-align: center; padding: 32px; color: #999; font-size: 0.85rem; }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6rem; }
+            .container { padding: 16px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>CampaignIQ Project Roadmap</h1>
+    <div class="subtitle">Global Political Intelligence Platform — Election Analytics for Any Country</div>
+    <div class="meta">Everton Dennis | University of East London | Created 26 March 2026 | Proven on UK 2024 GE, built for the world</div>
+</div>
+
+<div class="container">
+
+    <!-- Overview Stats -->
+    <div class="overview-grid">
+        <div class="stat-card">
+            <div class="number">5</div>
+            <div class="label">Development Phases</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">9</div>
+            <div class="label">Core Features</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">Next.js</div>
+            <div class="label">Frontend Framework</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">Vercel</div>
+            <div class="label">Deployment Target</div>
+        </div>
+    </div>
+
+    <!-- Architecture -->
+    <div class="section">
+        <h2>System Architecture</h2>
+        <div class="arch-box">
+            <h3>Frontend — Next.js on Vercel</h3>
+            <p>A modern React-based frontend using Next.js App Router with internationalisation (i18n) support. The UI features a country/election selector that dynamically configures the entire platform for any nation's political parties and electoral system. Three main tabs: Social Data Analysis, Single Text Analysis, and Voter Persona Generator. Deployed to Vercel for fast global CDN delivery.</p>
+            <div class="tech-tags">
+                <span class="tech-tag">Next.js 14+</span>
+                <span class="tech-tag">React 18</span>
+                <span class="tech-tag">TypeScript</span>
+                <span class="tech-tag">Tailwind CSS</span>
+                <span class="tech-tag">Recharts</span>
+                <span class="tech-tag">shadcn/ui</span>
+                <span class="tech-tag">next-intl (i18n)</span>
+            </div>
+        </div>
+        <div class="arch-box">
+            <h3>Backend — Python FastAPI</h3>
+            <p>A Python-based API server with country-agnostic ML models. The ensemble sentiment classifier uses multilingual transformers (XLM-RoBERTa) for global language support alongside English-specific models (BERTweet). BERTopic and LDA run topic extraction in any language. ANOVA and statistical analysis adapt to any party structure. Deployed as a separate service (Railway, Render, or AWS Lambda) for persistent GPU/compute.</p>
+            <div class="tech-tags">
+                <span class="tech-tag green">FastAPI</span>
+                <span class="tech-tag green">Python 3.11+</span>
+                <span class="tech-tag green">Transformers (HuggingFace)</span>
+                <span class="tech-tag green">XLM-RoBERTa (multilingual)</span>
+                <span class="tech-tag green">scikit-learn</span>
+                <span class="tech-tag green">BERTopic</span>
+                <span class="tech-tag green">pandas / numpy</span>
+                <span class="tech-tag green">scipy (ANOVA)</span>
+            </div>
+        </div>
+        <div class="arch-box">
+            <h3>LLM / AI API Integration Layer</h3>
+            <p>Universal API abstraction layer supporting all major LLM and AI providers. Users can plug in their own API key for any supported provider. The system auto-routes to the selected provider for the AI Strategic Advisor, Single Text Analysis, Voter Persona Generator, and the new AI-assisted data cleaning features.</p>
+            <div class="tech-tags">
+                <span class="tech-tag blue">Google Gemini API</span>
+                <span class="tech-tag blue">OpenAI API</span>
+                <span class="tech-tag blue">Anthropic Claude API</span>
+                <span class="tech-tag blue">Deepseek API</span>
+                <span class="tech-tag blue">Mistral API</span>
+                <span class="tech-tag blue">Cohere API</span>
+                <span class="tech-tag blue">Meta Llama (via Together/Groq)</span>
+                <span class="tech-tag blue">HuggingFace Inference API</span>
+                <span class="tech-tag blue">Custom OpenAI-compatible endpoint</span>
+            </div>
+        </div>
+        <div class="arch-box">
+            <h3>Data Cleaning & Preprocessing Engine</h3>
+            <p>Built-in data pipeline that cleans raw social media data before analysis. Handles messy real-world CSV files with missing values, duplicates, encoding issues, and noisy text. Users get a visual summary of what was cleaned and can adjust settings.</p>
+            <div class="tech-tags">
+                <span class="tech-tag green">pandas profiling</span>
+                <span class="tech-tag green">Text normalisation (emoji, URL, @mention handling)</span>
+                <span class="tech-tag green">Duplicate detection</span>
+                <span class="tech-tag green">Missing value imputation</span>
+                <span class="tech-tag green">Language filtering</span>
+                <span class="tech-tag green">Bot/spam detection</span>
+                <span class="tech-tag green">Encoding fix (UTF-8, Latin-1)</span>
+            </div>
+        </div>
+        <div class="arch-box">
+            <h3>Multi-Algorithm Analysis Engine</h3>
+            <p>CampaignIQ goes beyond the thesis models. Users can choose from a full library of ML, deep learning, NLP, and statistical algorithms — or let the system recommend the best approach for their data. Results from different models can be compared side-by-side.</p>
+            <div class="tech-tags">
+                <span class="tech-tag">Sentiment: XLM-RoBERTa</span>
+                <span class="tech-tag">Sentiment: BERTweet</span>
+                <span class="tech-tag">Sentiment: VADER</span>
+                <span class="tech-tag">Sentiment: TextBlob</span>
+                <span class="tech-tag green">Classification: Logistic Regression</span>
+                <span class="tech-tag green">Classification: SVM</span>
+                <span class="tech-tag green">Classification: Random Forest</span>
+                <span class="tech-tag green">Classification: XGBoost</span>
+                <span class="tech-tag green">Classification: CNN</span>
+                <span class="tech-tag green">Classification: LSTM / BiLSTM</span>
+                <span class="tech-tag blue">Topics: BERTopic</span>
+                <span class="tech-tag blue">Topics: LDA</span>
+                <span class="tech-tag blue">Topics: NMF</span>
+                <span class="tech-tag orange">Stats: ANOVA</span>
+                <span class="tech-tag orange">Stats: Chi-Square</span>
+                <span class="tech-tag orange">Stats: Correlation Matrix</span>
+                <span class="tech-tag orange">Stats: Regression Analysis</span>
+                <span class="tech-tag orange">NLP: TF-IDF</span>
+                <span class="tech-tag orange">NLP: Word2Vec / GloVe</span>
+                <span class="tech-tag orange">NLP: Named Entity Recognition</span>
+                <span class="tech-tag orange">Clustering: K-Means</span>
+                <span class="tech-tag orange">Clustering: DBSCAN</span>
+            </div>
+        </div>
+        <div class="arch-box">
+            <h3>Data & Storage</h3>
+            <p>Supabase for user auth, API key storage (encrypted), and analysis history. File uploads handled via temporary server-side processing. No long-term storage of uploaded CSV data for privacy reasons.</p>
+            <div class="tech-tags">
+                <span class="tech-tag orange">Supabase (Auth + DB)</span>
+                <span class="tech-tag orange">PostgreSQL</span>
+                <span class="tech-tag orange">Supabase Storage</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Design -->
+    <div class="section">
+        <h2>Global Multi-Country Design</h2>
+        <div class="arch-box">
+            <h3>How It Works for Any Country</h3>
+            <p>CampaignIQ is built country-agnostic from the ground up. The thesis was proven on the UK 2024 General Election, but the platform is designed so that a user in Brazil, India, Nigeria, France, or any other democracy can use it for their own elections. Here's how:</p>
+            <p><strong>Country/Election Configuration:</strong> When a user starts a new analysis, they first select their country and election (or create a custom one). This loads the relevant parties, electoral system type, and political context. Pre-built configs ship for major democracies; users can also define custom elections with their own party names and colours.</p>
+            <p><strong>Multilingual Sentiment:</strong> The ML pipeline uses XLM-RoBERTa (a multilingual transformer supporting 100+ languages) as the primary classifier, with BERTweet as a specialist for English tweets. This means sentiment classification works in Spanish, Portuguese, Hindi, French, Yoruba, Arabic, and more.</p>
+            <p><strong>Electoral System Awareness:</strong> The diagnostic framework adapts to different electoral systems — FPTP (UK, USA, India), proportional representation (Germany, Netherlands), mixed systems (Japan, New Zealand), and others. The disclaimer layer adjusts based on what kind of prediction is feasible under each system.</p>
+        </div>
+    </div>
+
+    <!-- Core Features -->
+    <div class="section">
+        <h2>Core Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <h4>1. Country & Election Setup</h4>
+                <p>Select from pre-built country profiles (UK, USA, India, Brazil, France, Nigeria, Germany, etc.) or create a custom election. Configures parties, colours, electoral system type (FPTP, PR, mixed), and political context automatically.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧹</div>
+                <h4>2. Data Cleaning Studio</h4>
+                <p>Automatic and manual data cleaning before analysis. Removes duplicates, handles missing values, normalises text (URLs, emojis, @mentions), detects bots/spam, fixes encoding. Visual before/after summary with adjustable settings. Supports CSV, Excel, JSON, and API imports.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h4>3. Social Data Analysis Portal</h4>
+                <p>Upload cleaned data in any language. Select parties and choose algorithms — from the thesis ensemble (XLM-RoBERTa + BERTweet + ANOVA) to classic ML (SVM, Random Forest, XGBoost) to deep learning (CNN, LSTM). Compare model results side-by-side. Output: vote share predictions, sentiment dashboards, topic breakdowns.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔬</div>
+                <h4>4. Algorithm Lab</h4>
+                <p>Choose from 20+ algorithms across sentiment analysis (VADER, TextBlob, transformers), classification (Logistic Regression, SVM, Random Forest, XGBoost, CNN, LSTM), topic modelling (BERTopic, LDA, NMF), clustering (K-Means, DBSCAN), and statistics (ANOVA, Chi-Square, regression). Auto-recommend the best approach or pick manually.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h4>5. Single Text Analysis</h4>
+                <p>Enter any political text in any language. Detects emotions (joy, sadness, anger, surprise, fear) with radar chart. Identifies political topics as tags — automatically adapted to the selected country's issues. Powered by any connected LLM provider.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👤</div>
+                <h4>6. Voter Persona Generator</h4>
+                <p>Input demographics, primary concerns, and core values for any country. LLM generates culturally relevant voter personas with backstory, concerns, political leanings, and how to appeal to them in that specific national context.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h4>7. AI Strategic Advisor</h4>
+                <p>Country-aware strategic campaign recommendations. Understands the difference between advising on a UK marginal seat, a US swing state, or a Brazilian state election. Counter-messaging and boost strategies tailored to the political context.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚖️</div>
+                <h4>8. Bias & Fairness Audit</h4>
+                <p>Model objectivity checks using Gini coefficient across all parties in the configured election. Ensures fair and transparent analysis regardless of country or number of parties.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚙️</div>
+                <h4>9. API Settings Panel</h4>
+                <p>Universal LLM provider selector: Google Gemini, OpenAI, Anthropic Claude, Deepseek, Mistral, Cohere, Meta Llama (via Together/Groq), HuggingFace, or any OpenAI-compatible endpoint. Save API keys securely. Test connection before saving.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Development Phases -->
+    <div class="section">
+        <h2>Development Phases</h2>
+
+        <div class="phase p1">
+            <div class="phase-header">
+                <div class="phase-title">Phase 1: Foundation & Setup</div>
+                <div class="phase-duration">Week 1–2</div>
+            </div>
+            <ul class="task-list">
+                <li><div class="check"></div><div class="task-text"><strong>Create GitHub repository</strong> — Monorepo structure with /frontend (Next.js) and /api (FastAPI)</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Initialise Next.js project</strong> — App Router, TypeScript, Tailwind CSS, shadcn/ui components</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Initialise FastAPI project</strong> — Python virtual environment, project structure, requirements.txt</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Set up Supabase project</strong> — Auth tables, API key storage schema, Row Level Security</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Configure Vercel deployment</strong> — Connect GitHub repo, set up environment variables, preview deployments</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Design database schema</strong> — Users, analysis_sessions, api_configs, analysis_results, countries, elections, parties tables</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Create country/election config system</strong> — JSON config files for pre-built countries (UK, USA, India, Brazil, France, Nigeria, Germany, etc.) with parties, colours, electoral system type</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Set up CI/CD pipeline</strong> — GitHub Actions for linting, testing, and auto-deploy on merge <span class="milestone">MILESTONE: Skeleton deployed</span></div></li>
+            </ul>
+        </div>
+
+        <div class="phase p2">
+            <div class="phase-header">
+                <div class="phase-title">Phase 2: Data Cleaning & ML Pipeline</div>
+                <div class="phase-duration">Week 3–6</div>
+            </div>
+            <ul class="task-list">
+                <li><div class="check"></div><div class="task-text"><strong>Build data cleaning pipeline</strong> — Duplicate removal, missing value handling, text normalisation (URLs, emojis, @mentions, hashtags, HTML), encoding fixes (UTF-8/Latin-1), whitespace cleanup</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Build bot/spam detector</strong> — Heuristic + ML-based detection of bot accounts and spam posts. Flag or remove before analysis</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Build data profiling endpoint</strong> — Auto-generate data quality report: row counts, null percentages, language distribution, duplicate rate, column types</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Build language detection</strong> — Auto-detect input language (langdetect/fasttext). Route to best model per language. Support 100+ languages</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Implement sentiment classifiers</strong> — Full library: XLM-RoBERTa (multilingual), BERTweet (English), VADER (lexicon), TextBlob (rule-based). User picks or auto-recommend</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Implement ML classifiers</strong> — Logistic Regression (TF-IDF), SVM, Random Forest, XGBoost. Configurable hyperparameters via UI</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Implement deep learning classifiers</strong> — CNN, LSTM, BiLSTM for text classification. GPU-accelerated where available</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Implement topic modelling</strong> — BERTopic (multilingual embeddings), LDA, NMF. Visual topic maps with word clouds</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Implement statistical analysis</strong> — Two-way ANOVA, Chi-Square tests, correlation matrices, linear/logistic regression, descriptive statistics</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Implement clustering algorithms</strong> — K-Means, DBSCAN for discovering voter segments and tweet groupings</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Implement NLP utilities</strong> — TF-IDF, Word2Vec/GloVe embeddings, Named Entity Recognition (NER), keyword extraction</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Build vote share prediction logic</strong> — Country-agnostic, accepts dynamic party list, adapts disclaimers to electoral system type</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Build model comparison engine</strong> — Run multiple algorithms on same data, compare accuracy/F1/precision/recall side-by-side</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Implement bias/fairness calculator</strong> — Gini coefficient across party predictions</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Write API tests</strong> — pytest suite covering all endpoints, all algorithms, edge cases <span class="milestone">MILESTONE: Full API live</span></div></li>
+            </ul>
+        </div>
+
+        <div class="phase p3">
+            <div class="phase-header">
+                <div class="phase-title">Phase 3: Frontend & Dashboard UI</div>
+                <div class="phase-duration">Week 6–9</div>
+            </div>
+            <ul class="task-list">
+                <li><div class="check"></div><div class="task-text"><strong>Build main layout</strong> — Navigation with country/election selector in header, feature tabs + sidebar</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Country & Election Setup page</strong> — Country picker with flags, election selector, "Create Custom Election" flow. Persists selection across tabs</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Data Cleaning Studio page</strong> — Upload CSV/Excel/JSON, visual data profiling report (nulls, duplicates, language distribution), toggle cleaning options, before/after preview, download cleaned data</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Algorithm Lab page</strong> — Algorithm picker with categories (Sentiment, Classification, Topics, Statistics, Clustering, NLP). Drag-and-drop pipeline builder or "Auto-recommend" mode. Hyperparameter sliders</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Social Data Analysis page</strong> — CSV upload, dynamic party checkboxes, algorithm selection, "Analyse & Predict" button, loading states with progress</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Prediction Dashboard</strong> — Vote share bar charts, sentiment distribution, topic breakdown, model comparison table, confusion matrices</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Single Text Analysis page</strong> — Text input (any language), auto-detected language badge, "Analyse Text" button, emotion radar chart, topic tags</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Voter Persona Generator page</strong> — Demographics, Primary Concerns, Core Values inputs, "Generate" button, formatted persona output</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>API Settings sidebar</strong> — Provider dropdown (9+ providers), API key input, endpoint field, "Test Connection" + "Save Settings" buttons</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>AI Strategic Advisor panel</strong> — "Get Strategic Advice" button, formatted advice output based on latest analysis</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Bias & Fairness Audit widget</strong> — Party bias bar chart, Gini coefficient display</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Results export</strong> — Download analysis results as CSV, PDF report, or JSON. Share via link</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Responsive design + Accessibility</strong> — Mobile-friendly, WCAG 2.1 AA, keyboard nav, screen reader support <span class="milestone">MILESTONE: Full UI complete</span></div></li>
+            </ul>
+        </div>
+
+        <div class="phase p4">
+            <div class="phase-header">
+                <div class="phase-title">Phase 4: LLM Integration & Auth</div>
+                <div class="phase-duration">Week 9–11</div>
+            </div>
+            <ul class="task-list">
+                <li><div class="check"></div><div class="task-text"><strong>LLM provider abstraction</strong> — Unified interface supporting 9+ providers: Google Gemini, OpenAI, Anthropic Claude, Deepseek, Mistral, Cohere, Meta Llama (via Together/Groq), HuggingFace Inference, and any OpenAI-compatible custom endpoint. Auto-detect provider from API key format</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Wire up AI Strategic Advisor</strong> — Send analysis context to LLM, return strategy recommendations</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Wire up Voter Persona Generator</strong> — Prompt engineering for rich narrative personas from demographic inputs</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Wire up Single Text emotional analysis</strong> — LLM-powered emotion detection + topic identification</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>User authentication</strong> — Supabase Auth with email/password sign-up, login, password reset</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Secure API key storage</strong> — Encrypted storage of user LLM API keys in Supabase</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Analysis history</strong> — Save and retrieve past analysis sessions per user <span class="milestone">MILESTONE: Full feature parity</span></div></li>
+            </ul>
+        </div>
+
+        <div class="phase p5">
+            <div class="phase-header">
+                <div class="phase-title">Phase 5: Polish, Testing & Launch</div>
+                <div class="phase-duration">Week 11–14</div>
+            </div>
+            <ul class="task-list">
+                <li><div class="check"></div><div class="task-text"><strong>End-to-end testing</strong> — Cypress/Playwright tests for all user flows</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Performance optimisation</strong> — Lazy loading ML models, optimised bundle size, API response caching</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Landing page</strong> — Public homepage explaining CampaignIQ, features, thesis background, and sign-up CTA</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Documentation</strong> — README, API docs, user guide for non-technical users</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>SEO & Open Graph</strong> — Meta tags, social sharing previews, sitemap</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Error handling & monitoring</strong> — Sentry integration, graceful error states, rate limiting</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Security audit</strong> — Input sanitisation, CORS config, API key exposure prevention</div></li>
+                <li><div class="check"></div><div class="task-text"><strong>Production deployment</strong> — Final Vercel deployment, custom domain setup, SSL <span class="milestone">MILESTONE: LAUNCH</span></div></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Repository Structure -->
+    <div class="section">
+        <h2>Repository Structure</h2>
+        <div class="arch-box">
+<pre style="font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #444; overflow-x: auto;">
+campaigniq/
+├── frontend/                     # Next.js application
+│   ├── app/
+│   │   ├── layout.tsx            # Root layout with navigation
+│   │   ├── page.tsx              # Landing / home page
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx          # Main dashboard
+│   │   │   ├── setup/            # Country & Election Setup
+│   │   │   ├── social-analysis/  # Social Data Analysis tab
+│   │   │   ├── text-analysis/    # Single Text Analysis tab
+│   │   │   └── persona/          # Voter Persona Generator tab
+│   │   ├── auth/
+│   │   │   ├── login/
+│   │   │   └── signup/
+│   │   └── api/                  # Next.js API routes (proxy to Python)
+│   ├── components/
+│   │   ├── ui/                   # shadcn/ui base components
+│   │   ├── charts/               # Recharts wrappers
+│   │   ├── dashboard/            # Dashboard-specific components
+│   │   ├── country/              # Country picker, election selector
+│   │   └── layout/               # Nav, sidebar, footer
+│   ├── lib/
+│   │   ├── supabase.ts           # Supabase client
+│   │   ├── api.ts                # Python API client
+│   │   ├── llm.ts                # LLM provider abstraction
+│   │   └── election-context.ts   # React context for selected election
+│   ├── tailwind.config.ts
+│   ├── next.config.js
+│   └── package.json
+│
+├── api/                          # Python FastAPI backend
+│   ├── main.py                   # FastAPI app entry point
+│   ├── routers/
+│   │   ├── analysis.py           # /analyse-csv, /analyse-text
+│   │   ├── prediction.py         # /predict-vote-share
+│   │   ├── persona.py            # /generate-persona
+│   │   ├── strategy.py           # /get-strategy
+│   │   └── elections.py          # /elections, /countries, /custom-election
+│   ├── models/
+│   │   ├── sentiment/
+│   │   │   ├── xlm_roberta.py    # XLM-RoBERTa (multilingual)
+│   │   │   ├── bertweet.py       # BERTweet (English specialist)
+│   │   │   ├── vader.py          # VADER lexicon-based
+│   │   │   └── textblob.py       # TextBlob rule-based
+│   │   ├── classifiers/
+│   │   │   ├── logistic.py       # TF-IDF + Logistic Regression
+│   │   │   ├── svm.py            # Support Vector Machine
+│   │   │   ├── random_forest.py  # Random Forest
+│   │   │   ├── xgboost.py        # XGBoost
+│   │   │   ├── cnn.py            # Convolutional Neural Network
+│   │   │   └── lstm.py           # LSTM / BiLSTM
+│   │   ├── topics/
+│   │   │   ├── bertopic.py       # BERTopic (multilingual)
+│   │   │   ├── lda.py            # Latent Dirichlet Allocation
+│   │   │   └── nmf.py            # Non-negative Matrix Factorisation
+│   │   ├── statistics/
+│   │   │   ├── anova.py          # Two-way ANOVA
+│   │   │   ├── chi_square.py     # Chi-Square test
+│   │   │   ├── correlation.py    # Correlation matrix
+│   │   │   └── regression.py     # Linear/logistic regression
+│   │   ├── clustering/
+│   │   │   ├── kmeans.py         # K-Means clustering
+│   │   │   └── dbscan.py         # DBSCAN clustering
+│   │   ├── nlp/
+│   │   │   ├── tfidf.py          # TF-IDF vectorisation
+│   │   │   ├── embeddings.py     # Word2Vec / GloVe
+│   │   │   └── ner.py            # Named Entity Recognition
+│   │   ├── ensemble.py           # Weighted ensemble builder
+│   │   ├── bias_audit.py         # Gini fairness calculator
+│   │   ├── lang_detect.py        # Language detection router
+│   │   └── model_registry.py     # Algorithm registry & auto-recommend
+│   ├── services/
+│   │   ├── llm_service.py        # Universal multi-provider LLM client
+│   │   ├── data_cleaner.py       # Data cleaning pipeline
+│   │   ├── data_profiler.py      # Data quality profiling
+│   │   ├── csv_processor.py      # CSV/Excel/JSON upload & validation
+│   │   ├── bot_detector.py       # Bot/spam detection
+│   │   ├── emotion_detector.py   # Emotion classification
+│   │   ├── model_comparator.py   # Side-by-side model comparison
+│   │   └── election_config.py    # Country/election config loader
+│   ├── configs/
+│   │   ├── countries/            # Per-country JSON configs
+│   │   │   ├── uk.json           # UK parties, FPTP system
+│   │   │   ├── usa.json          # US parties, Electoral College
+│   │   │   ├── india.json        # India parties, FPTP system
+│   │   │   ├── brazil.json       # Brazil parties, PR system
+│   │   │   ├── france.json       # France parties, two-round
+│   │   │   ├── germany.json      # Germany parties, MMP system
+│   │   │   ├── nigeria.json      # Nigeria parties, FPTP system
+│   │   │   └── _template.json    # Template for custom elections
+│   │   └── electoral_systems.json # FPTP, PR, MMP, two-round definitions
+│   ├── tests/
+│   │   ├── test_ensemble.py
+│   │   ├── test_analysis.py
+│   │   ├── test_prediction.py
+│   │   └── test_multilingual.py
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── supabase/
+│   └── migrations/               # Database migration files
+│
+├── .github/
+│   └── workflows/
+│       ├── frontend.yml          # CI for Next.js
+│       └── api.yml               # CI for Python API
+│
+├── README.md
+├── .gitignore
+└── vercel.json
+</pre>
+        </div>
+    </div>
+
+    <!-- Key Risks -->
+    <div class="section">
+        <h2>Risks & Mitigations</h2>
+        <table class="risk-table">
+            <thead>
+                <tr>
+                    <th>Risk</th>
+                    <th>Severity</th>
+                    <th>Mitigation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>ML model size too large for serverless (RoBERTa ~500MB)</td>
+                    <td class="risk-high">High</td>
+                    <td>Use model distillation, host on Railway/Render with persistent compute, or use HuggingFace Inference API</td>
+                </tr>
+                <tr>
+                    <td>Cold start latency on Python API</td>
+                    <td class="risk-med">Medium</td>
+                    <td>Keep-alive pings, model caching, consider dedicated VM for API</td>
+                </tr>
+                <tr>
+                    <td>LLM API costs for users</td>
+                    <td class="risk-low">Low</td>
+                    <td>Users supply their own API keys; no cost to CampaignIQ</td>
+                </tr>
+                <tr>
+                    <td>CSV processing timeout on large files</td>
+                    <td class="risk-med">Medium</td>
+                    <td>Batch processing with progress bar, max 10,000 rows per upload, async processing with polling</td>
+                </tr>
+                <tr>
+                    <td>Twitter/X API access changes</td>
+                    <td class="risk-med">Medium</td>
+                    <td>App works with pre-collected CSV data; not dependent on live Twitter API</td>
+                </tr>
+                <tr>
+                    <td>Accuracy expectations vs thesis limitations</td>
+                    <td class="risk-med">Medium</td>
+                    <td>Clear disclaimers on dashboard: "measurement tool, not a predictor" — aligned with thesis conclusions</td>
+                </tr>
+                <tr>
+                    <td>Multilingual sentiment accuracy varies by language</td>
+                    <td class="risk-high">High</td>
+                    <td>XLM-RoBERTa performs best on high-resource languages (English, French, Spanish, German). Show confidence badge per language. Allow community fine-tuning in future</td>
+                </tr>
+                <tr>
+                    <td>Electoral system differences affect prediction validity</td>
+                    <td class="risk-med">Medium</td>
+                    <td>Dynamic disclaimers per electoral system type. PR systems get "indicative only" labels. FPTP gets the full diagnostic framework from thesis</td>
+                </tr>
+                <tr>
+                    <td>Maintaining country configs as politics change</td>
+                    <td class="risk-low">Low</td>
+                    <td>Users can create custom elections with any parties. Pre-built configs are starting points, not hard dependencies. Community contribution model for updates</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="section">
+        <h2>Immediate Next Steps</h2>
+        <div class="arch-box">
+            <p>To kick off development, we should work through these items in order:</p>
+            <ol style="padding-left: 20px; margin-top: 12px; color: #444;">
+                <li style="margin-bottom: 8px;"><strong>Create the GitHub repository</strong> with the monorepo structure above</li>
+                <li style="margin-bottom: 8px;"><strong>Scaffold the Next.js frontend</strong> with Tailwind, shadcn/ui, and the 3-tab layout</li>
+                <li style="margin-bottom: 8px;"><strong>Scaffold the FastAPI backend</strong> with placeholder endpoints</li>
+                <li style="margin-bottom: 8px;"><strong>Set up Supabase</strong> project with auth and database schema</li>
+                <li style="margin-bottom: 8px;"><strong>Deploy skeleton</strong> to Vercel to confirm the full pipeline works end-to-end</li>
+                <li style="margin-bottom: 8px;"><strong>Port the ML models</strong> from your thesis Python code into the API</li>
+            </ol>
+            <p style="margin-top: 16px; font-style: italic; color: #666;">Tell me "let's start Phase 1" and I'll begin building the code.</p>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    CampaignIQ Project Plan — Generated 26 March 2026 — Based on doctoral thesis by Everton George Dennis, UEL
+</div>
+
+</body>
+</html>

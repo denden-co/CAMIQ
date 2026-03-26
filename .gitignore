@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build
+.next/
+dist/
+build/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Supabase
+supabase/.temp/
+
+# ML models (too large for git)
+api/models/weights/
+*.pt
+*.bin
+*.safetensors
+
+# gstack
+.claude/skills/gstack/browse/dist/
+.claude/skills/gstack/gstack_temp/
