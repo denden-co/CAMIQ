@@ -35,6 +35,5 @@ api/models/weights/
 *.bin
 *.safetensors
 
-# gstack
-.claude/skills/gstack/browse/dist/
-.claude/skills/gstack/gstack_temp/
+# gstack — kept local, not shared with collaborators
+.claude/
