@@ -3,9 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { CsvUpload } from "@/components/csv-upload";
+import { useCountry } from "@/lib/country-context";
 import {
   analyzeBatch,
   analyzeText,
+  getDevUserEmail,
+  saveAnalysis,
+  type AnalysisSource,
   type AnalyzeResponse,
   type BatchAnalyzeResponse,
   type SentimentLabel,
@@ -34,10 +39,11 @@ const LANG_FLAGS: Record<string, string> = {
   bn: "🇧🇩", ta: "🇮🇳", fa: "🇮🇷",
 };
 
-type Mode = "single" | "batch";
+type Mode = "single" | "batch" | "csv";
 
 export default function AnalyzePage() {
   const [mode, setMode] = useState<Mode>("single");
+  const { selected: country } = useCountry();
 
   return (
     <main className="min-h-screen bg-background">
@@ -84,11 +90,28 @@ export default function AnalyzePage() {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Batch
+            Batch paste
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("csv")}
+            className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+              mode === "csv"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            CSV upload
           </button>
         </div>
 
-        {mode === "single" ? <SingleMode /> : <BatchMode />}
+        {mode === "single" && <SingleMode />}
+        {mode === "batch" && (
+          <BatchMode countryId={country?.id ?? null} source="paste" />
+        )}
+        {mode === "csv" && (
+          <CsvMode countryId={country?.id ?? null} />
+        )}
       </section>
     </main>
   );
@@ -228,7 +251,13 @@ function SingleResults({ result }: { result: AnalyzeResponse }) {
 // Batch mode
 // ---------------------------------------------------------------------------
 
-function BatchMode() {
+function BatchMode({
+  countryId,
+  source,
+}: {
+  countryId: string | null;
+  source: AnalysisSource;
+}) {
   const [raw, setRaw] = useState("");
   const [result, setResult] = useState<BatchAnalyzeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -287,7 +316,60 @@ function BatchMode() {
       </form>
 
       {error && <ErrorCard error={error} />}
-      {result && <BatchResults result={result} originalLines={lines} />}
+      {result && (
+        <BatchResults
+          result={result}
+          originalLines={lines}
+          countryId={countryId}
+          source={source}
+          defaultName={`Batch ${new Date().toLocaleString()}`}
+        />
+      )}
+    </>
+  );
+}
+
+function CsvMode({ countryId }: { countryId: string | null }) {
+  const [texts, setTexts] = useState<string[] | null>(null);
+  const [filename, setFilename] = useState<string>("");
+  const [result, setResult] = useState<BatchAnalyzeResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function runAnalysis(ts: string[], meta: { filename: string; column: string }) {
+    setError(null);
+    setResult(null);
+    setTexts(ts);
+    setFilename(meta.filename);
+    setLoading(true);
+    try {
+      const r = await analyzeBatch(ts);
+      setResult(r);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <CsvUpload onColumnSelected={runAnalysis} />
+      {loading && (
+        <p className="mt-6 text-sm text-muted-foreground">
+          Analysing {texts?.length ?? 0} rows with XLM-RoBERTa…
+        </p>
+      )}
+      {error && <ErrorCard error={error} />}
+      {result && texts && (
+        <BatchResults
+          result={result}
+          originalLines={texts}
+          countryId={countryId}
+          source="csv"
+          defaultName={filename.replace(/\.csv$/i, "") || `CSV ${new Date().toLocaleString()}`}
+        />
+      )}
     </>
   );
 }
@@ -295,15 +377,102 @@ function BatchMode() {
 function BatchResults({
   result,
   originalLines,
+  countryId,
+  source,
+  defaultName,
 }: {
   result: BatchAnalyzeResponse;
   originalLines: string[];
+  countryId: string | null;
+  source: AnalysisSource;
+  defaultName: string;
 }) {
   const { aggregate } = result;
   const labels: SentimentLabel[] = ["positive", "neutral", "negative"];
 
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  async function handleSave() {
+    setSaveError(null);
+    setSaveMessage(null);
+    const email = getDevUserEmail();
+    if (!email) {
+      setSaveError("Not signed in — sign in first to save analyses.");
+      return;
+    }
+    const name = window.prompt("Name this analysis:", defaultName)?.trim();
+    if (!name) return;
+
+    setSaving(true);
+    try {
+      const saved = await saveAnalysis({
+        name,
+        country_id: countryId,
+        source,
+        original_texts: originalLines,
+        batch: result,
+      });
+      setSaveMessage(`Saved as "${saved.name}" — visible on your dashboard.`);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Save failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleExportCsv() {
+    const rows = result.results.map((r, i) => ({
+      row: i + 1,
+      text: originalLines[i] ?? "",
+      label: r.label,
+      confidence: r.confidence.toFixed(4),
+      compound: r.scores.compound.toFixed(4),
+      positive: r.scores.positive.toFixed(4),
+      neutral: r.scores.neutral.toFixed(4),
+      negative: r.scores.negative.toFixed(4),
+      language: r.language?.code ?? "",
+      language_name: r.language?.name ?? "",
+      model: r.model,
+    }));
+    const headers = Object.keys(rows[0] ?? { row: "" });
+    const esc = (v: unknown) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csv = [
+      headers.join(","),
+      ...rows.map((r) => headers.map((h) => esc((r as Record<string, unknown>)[h])).join(",")),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `campaigniq-analysis-${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="mt-8 space-y-6">
+      <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/30 px-4 py-3">
+        <Button type="button" onClick={handleSave} disabled={saving}>
+          {saving ? "Saving…" : "Save analysis"}
+        </Button>
+        <Button type="button" variant="outline" onClick={handleExportCsv}>
+          Export CSV
+        </Button>
+        {saveMessage && (
+          <span className="text-sm text-green-700">{saveMessage}</span>
+        )}
+        {saveError && (
+          <span className="text-sm text-red-600">{saveError}</span>
+        )}
+      </div>
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard label="Texts analysed">
           <span className="text-2xl font-bold">{aggregate.total}</span>
