@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -65,7 +66,8 @@ export default function DashboardPage() {
           <DashboardCard
             title="Single Text Analysis"
             description="Analyse any text — speech, manifesto, post — instantly"
-            status="Coming Phase 2"
+            status="Live"
+            href="/analyze"
           />
           <DashboardCard
             title="Voter Personas"
@@ -97,18 +99,31 @@ function DashboardCard({
   title,
   description,
   status,
+  href,
 }: {
   title: string;
   description: string;
   status: string;
+  href?: string;
 }) {
-  return (
-    <div className="rounded-lg border border-border bg-background p-6 shadow-sm">
+  const isLive = status.toLowerCase() === "live";
+  const body = (
+    <div
+      className={`h-full rounded-lg border border-border bg-background p-6 shadow-sm transition ${
+        href ? "hover:border-primary hover:shadow-md" : ""
+      }`}
+    >
       <h3 className="font-semibold">{title}</h3>
       <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-      <p className="mt-4 text-xs uppercase tracking-wide text-primary">
+      <p
+        className={`mt-4 text-xs uppercase tracking-wide ${
+          isLive ? "text-green-600" : "text-primary"
+        }`}
+      >
         {status}
       </p>
     </div>
   );
+
+  return href ? <Link href={href as any}>{body}</Link> : body;
 }
