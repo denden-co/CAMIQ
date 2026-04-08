@@ -13,6 +13,21 @@ source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### Optional: enable the multilingual XLM-RoBERTa model
+
+The slim `requirements.txt` ships VADER only (English). To unlock the
+multilingual transformer backend (v1) install the ML extras:
+
+```bash
+pip install -r requirements-ml.txt
+```
+
+On first boot the API will download
+`cardiffnlp/twitter-xlm-roberta-base-sentiment` (~1.1GB) into the Hugging
+Face cache. After that, `/api/analyze` will automatically use XLM-RoBERTa
+for any language. Hit `GET /health` to confirm — the `sentiment_model`
+field reports which backend is live.
+
 ## Run
 
 ```bash
@@ -28,8 +43,10 @@ Interactive docs (Swagger UI) at **http://localhost:8000/docs**.
 
 | Method | Path            | Purpose                                    |
 | ------ | --------------- | ------------------------------------------ |
-| GET    | `/health`       | Health check — `{status, version}`         |
-| POST   | `/api/analyze`  | Single Text Analysis (VADER sentiment v0)  |
+| GET    | `/health`       | Health check — `{status, version, sentiment_model}` |
+| POST   | `/api/analyze`  | Single Text Analysis (VADER or XLM-RoBERTa) |
+| GET    | `/api/countries`| List configured country profiles             |
+| GET    | `/api/countries/{id}` | Full profile (parties, electoral system) |
 
 ### Example: single text analysis
 

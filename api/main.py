@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import analyze, countries
+from app.services.sentiment import active_model_name
 
 app = FastAPI(
     title="CampaignIQ API",
@@ -32,4 +33,8 @@ app.include_router(countries.router, prefix="/api", tags=["countries"])
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "version": "0.1.0"}
+    return {
+        "status": "ok",
+        "version": "0.1.0",
+        "sentiment_model": active_model_name(),
+    }

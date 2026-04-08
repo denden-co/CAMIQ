@@ -10,13 +10,20 @@
 transformers>=4.38.0
 torch>=2.2.0
 huggingface-hub>=0.21.0
+# sentencepiece is required by the XLM-RoBERTa tokenizer (SentencePiece BPE).
+# transformers does not pull it in automatically — missing it causes the
+# sentiment service to silently fall back to VADER.
+sentencepiece>=0.2.0
 
 # Classical ML
 scikit-learn>=1.4.0
 xgboost>=2.0.0
 
 # Topic modelling
-gensim>=4.3.0
+# NOTE: gensim removed — no Python 3.14 wheel yet (PyDictObject.ma_version_tag
+# was dropped in CPython 3.14, source build fails). BERTopic uses
+# sentence-transformers + UMAP + HDBSCAN by default and does not require
+# gensim. Re-add under a Python 3.12 venv if/when we want Word2Vec or LDA.
 bertopic>=0.16.0
 
 # Alt sentiment / text
