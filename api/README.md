@@ -45,6 +45,7 @@ Interactive docs (Swagger UI) at **http://localhost:8000/docs**.
 | ------ | --------------- | ------------------------------------------ |
 | GET    | `/health`       | Health check — `{status, version, sentiment_model}` |
 | POST   | `/api/analyze`  | Single Text Analysis (VADER or XLM-RoBERTa) |
+| POST   | `/api/analyze/batch` | Batch sentiment (up to 500 texts) + aggregate stats |
 | GET    | `/api/countries`| List configured country profiles             |
 | GET    | `/api/countries/{id}` | Full profile (parties, electoral system) |
 

@@ -1,0 +1,27 @@
+{
+  "id": "br-2026-presidential",
+  "country": "Brazil",
+  "country_code": "BR",
+  "election_name": "2026 Brazilian Presidential Election",
+  "election_type": "presidential",
+  "electoral_system": "two_round",
+  "date": "2026-10-04",
+  "languages": ["pt"],
+  "primary_language": "pt",
+  "parties": [
+    {"id": "pt", "name": "Workers' Party", "short": "PT", "colour": "#CC0000"},
+    {"id": "pl", "name": "Liberal Party", "short": "PL", "colour": "#1B365D"},
+    {"id": "psdb", "name": "Brazilian Social Democracy Party", "short": "PSDB", "colour": "#0080C0"},
+    {"id": "mdb", "name": "Brazilian Democratic Movement", "short": "MDB", "colour": "#00A859"},
+    {"id": "psol", "name": "Socialism and Liberty Party", "short": "PSOL", "colour": "#F0C000"},
+    {"id": "novo", "name": "New Party", "short": "NOVO", "colour": "#FF8000"},
+    {"id": "uni", "name": "Brazil Union", "short": "UNIÃO", "colour": "#0066B3"}
+  ],
+  "disclaimers": [
+    "Brazil's two-round presidential system means first-round sentiment forecasts qualifiers but not winners — transfers dominate the runoff.",
+    "Intense regional polarisation (Northeast vs South) means national aggregates hide decisive state-level divergence.",
+    "WhatsApp and Telegram are primary political communication channels — Twitter/X sentiment captures only a slice of voter conversation."
+  ],
+  "sentiment_models_recommended": ["xlm-roberta", "ensemble"],
+  "total_constituencies": null
+}

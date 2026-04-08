@@ -3,12 +3,102 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { analyzeText, type AnalyzeResponse } from "@/lib/api";
+import {
+  analyzeBatch,
+  analyzeText,
+  type AnalyzeResponse,
+  type BatchAnalyzeResponse,
+  type SentimentLabel,
+} from "@/lib/api";
 
 const SAMPLE =
   "The new housing policy is a bold step forward. Families finally have a reason to be hopeful, though some critics argue the plan doesn't go far enough on affordability.";
 
+const BATCH_SAMPLE = [
+  "The new housing policy is a bold step forward for families.",
+  "This government has completely failed working people.",
+  "Today's debate covered tax, immigration, and the NHS.",
+  "La nouvelle politique du logement est une avancée bienvenue.",
+  "El debate electoral fue largo y tocó varios temas económicos.",
+  "Die Regierung hat die Wähler zutiefst enttäuscht.",
+].join("\n");
+
+// ISO-639-1 → flag emoji map. Falls back to globe for unknowns.
+const LANG_FLAGS: Record<string, string> = {
+  en: "🇬🇧", fr: "🇫🇷", es: "🇪🇸", de: "🇩🇪", it: "🇮🇹",
+  pt: "🇵🇹", ar: "🇸🇦", hi: "🇮🇳", nl: "🇳🇱", pl: "🇵🇱",
+  ru: "🇷🇺", uk: "🇺🇦", "zh-cn": "🇨🇳", "zh-tw": "🇹🇼",
+  ja: "🇯🇵", ko: "🇰🇷", tr: "🇹🇷", sv: "🇸🇪", da: "🇩🇰",
+  fi: "🇫🇮", no: "🇳🇴", el: "🇬🇷", he: "🇮🇱", cs: "🇨🇿",
+  hu: "🇭🇺", ro: "🇷🇴", id: "🇮🇩", vi: "🇻🇳", th: "🇹🇭",
+  bn: "🇧🇩", ta: "🇮🇳", fa: "🇮🇷",
+};
+
+type Mode = "single" | "batch";
+
 export default function AnalyzePage() {
+  const [mode, setMode] = useState<Mode>("single");
+
+  return (
+    <main className="min-h-screen bg-background">
+      <header className="border-b border-border">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+          <Link href="/dashboard" className="text-xl font-bold">
+            CampaignIQ
+          </Link>
+          <Link
+            href="/dashboard"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Back to dashboard
+          </Link>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-5xl px-6 py-12">
+        <h1 className="text-3xl font-bold">Text Analysis</h1>
+        <p className="mt-2 text-muted-foreground">
+          Paste any piece of text — a speech, a tweet, a manifesto excerpt — or
+          drop a whole list. Multilingual sentiment, key phrases, and aggregate
+          stats in one call.
+        </p>
+
+        <div className="mt-6 inline-flex rounded-md border border-border p-1">
+          <button
+            type="button"
+            onClick={() => setMode("single")}
+            className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+              mode === "single"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Single text
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("batch")}
+            className={`rounded px-4 py-1.5 text-sm font-medium transition ${
+              mode === "batch"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Batch
+          </button>
+        </div>
+
+        {mode === "single" ? <SingleMode /> : <BatchMode />}
+      </section>
+    </main>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Single text mode
+// ---------------------------------------------------------------------------
+
+function SingleMode() {
   const [text, setText] = useState("");
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -30,76 +120,44 @@ export default function AnalyzePage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Link href="/dashboard" className="text-xl font-bold">
-            CampaignIQ
-          </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm text-muted-foreground hover:text-foreground"
+    <>
+      <form onSubmit={handleAnalyze} className="mt-8 space-y-4">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Paste text here…"
+          rows={10}
+          className="w-full rounded-md border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          required
+        />
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" disabled={loading || !text.trim()}>
+            {loading ? "Analysing…" : "Analyse"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setText(SAMPLE);
+              setResult(null);
+              setError(null);
+            }}
           >
-            ← Back to dashboard
-          </Link>
+            Try sample text
+          </Button>
+          <span className="ml-auto text-xs text-muted-foreground">
+            {text.length.toLocaleString()} characters
+          </span>
         </div>
-      </header>
+      </form>
 
-      <section className="mx-auto max-w-5xl px-6 py-12">
-        <h1 className="text-3xl font-bold">Single Text Analysis</h1>
-        <p className="mt-2 text-muted-foreground">
-          Paste any piece of text — a speech, a tweet, a manifesto excerpt — and
-          get sentiment, confidence, and the words driving the signal.
-        </p>
-
-        <form onSubmit={handleAnalyze} className="mt-8 space-y-4">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Paste text here…"
-            rows={10}
-            className="w-full rounded-md border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            required
-          />
-          <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" disabled={loading || !text.trim()}>
-              {loading ? "Analysing…" : "Analyse"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setText(SAMPLE);
-                setResult(null);
-                setError(null);
-              }}
-            >
-              Try sample text
-            </Button>
-            <span className="ml-auto text-xs text-muted-foreground">
-              {text.length.toLocaleString()} characters
-            </span>
-          </div>
-        </form>
-
-        {error && (
-          <div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <p className="font-medium">Analysis failed</p>
-            <p className="mt-1">{error}</p>
-            <p className="mt-2 text-xs text-red-600">
-              Make sure the FastAPI backend is running at{" "}
-              <code>http://localhost:8000</code>.
-            </p>
-          </div>
-        )}
-
-        {result && <Results result={result} />}
-      </section>
-    </main>
+      {error && <ErrorCard error={error} />}
+      {result && <SingleResults result={result} />}
+    </>
   );
 }
 
-function Results({ result }: { result: AnalyzeResponse }) {
+function SingleResults({ result }: { result: AnalyzeResponse }) {
   const labelColour =
     result.label === "positive"
       ? "bg-green-100 text-green-800"
@@ -109,6 +167,7 @@ function Results({ result }: { result: AnalyzeResponse }) {
 
   return (
     <div className="mt-8 space-y-6">
+      {result.language && <LanguageChip language={result.language} />}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Sentiment">
           <span
@@ -126,9 +185,7 @@ function Results({ result }: { result: AnalyzeResponse }) {
           <span className="text-2xl font-bold">
             {result.scores.compound.toFixed(3)}
           </span>
-          <span className="ml-2 text-xs text-muted-foreground">
-            (−1 to +1)
-          </span>
+          <span className="ml-2 text-xs text-muted-foreground">(−1 to +1)</span>
         </StatCard>
       </div>
 
@@ -156,27 +213,278 @@ function Results({ result }: { result: AnalyzeResponse }) {
       </div>
 
       {result.key_phrases.length > 0 && (
-        <div className="rounded-lg border border-border bg-background p-6">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Key phrases
-          </h3>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {result.key_phrases.map((kp) => (
-              <span
-                key={kp.phrase}
-                className="rounded-md border border-border bg-muted px-3 py-1 text-sm"
-                style={{ opacity: 0.4 + kp.weight * 0.6 }}
-              >
-                {kp.phrase}
-              </span>
-            ))}
-          </div>
-        </div>
+        <KeyPhrasesCard phrases={result.key_phrases} title="Key phrases" />
       )}
 
       <p className="text-xs text-muted-foreground">
         Model: <code>{result.model}</code> · {result.word_count} words ·{" "}
         {result.character_count} characters
+      </p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Batch mode
+// ---------------------------------------------------------------------------
+
+function BatchMode() {
+  const [raw, setRaw] = useState("");
+  const [result, setResult] = useState<BatchAnalyzeResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const lines = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  async function handleAnalyze(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setResult(null);
+    setLoading(true);
+    try {
+      const r = await analyzeBatch(lines);
+      setResult(r);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <form onSubmit={handleAnalyze} className="mt-8 space-y-4">
+        <textarea
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+          placeholder="Paste one text per line — up to 500 rows…"
+          rows={12}
+          className="w-full rounded-md border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          required
+        />
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" disabled={loading || lines.length === 0}>
+            {loading ? `Analysing ${lines.length}…` : `Analyse ${lines.length || ""} rows`}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setRaw(BATCH_SAMPLE);
+              setResult(null);
+              setError(null);
+            }}
+          >
+            Try multilingual sample
+          </Button>
+          <span className="ml-auto text-xs text-muted-foreground">
+            {lines.length} non-empty rows · max 500
+          </span>
+        </div>
+      </form>
+
+      {error && <ErrorCard error={error} />}
+      {result && <BatchResults result={result} originalLines={lines} />}
+    </>
+  );
+}
+
+function BatchResults({
+  result,
+  originalLines,
+}: {
+  result: BatchAnalyzeResponse;
+  originalLines: string[];
+}) {
+  const { aggregate } = result;
+  const labels: SentimentLabel[] = ["positive", "neutral", "negative"];
+
+  return (
+    <div className="mt-8 space-y-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard label="Texts analysed">
+          <span className="text-2xl font-bold">{aggregate.total}</span>
+        </StatCard>
+        <StatCard label="Mean compound">
+          <span className="text-2xl font-bold">
+            {aggregate.mean_compound.toFixed(3)}
+          </span>
+          <span className="ml-2 text-xs text-muted-foreground">(−1..+1)</span>
+        </StatCard>
+        <StatCard label="Dominant label">
+          <span className="text-lg font-bold capitalize">
+            {labels.reduce((a, b) =>
+              aggregate.label_counts[a] >= aggregate.label_counts[b] ? a : b
+            )}
+          </span>
+        </StatCard>
+        <StatCard label="Languages">
+          <span className="text-lg font-bold">
+            {Object.keys(aggregate.language_counts).length || "—"}
+          </span>
+        </StatCard>
+      </div>
+
+      <div className="rounded-lg border border-border bg-background p-6">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Label distribution
+        </h3>
+        <div className="mt-4 space-y-3">
+          <ScoreBar
+            label="Positive"
+            value={aggregate.label_share.positive ?? 0}
+            colour="bg-green-500"
+            suffix={`${aggregate.label_counts.positive ?? 0} rows`}
+          />
+          <ScoreBar
+            label="Neutral"
+            value={aggregate.label_share.neutral ?? 0}
+            colour="bg-gray-400"
+            suffix={`${aggregate.label_counts.neutral ?? 0} rows`}
+          />
+          <ScoreBar
+            label="Negative"
+            value={aggregate.label_share.negative ?? 0}
+            colour="bg-red-500"
+            suffix={`${aggregate.label_counts.negative ?? 0} rows`}
+          />
+        </div>
+      </div>
+
+      {Object.keys(aggregate.language_counts).length > 0 && (
+        <div className="rounded-lg border border-border bg-background p-6">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Language mix
+          </h3>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {Object.entries(aggregate.language_counts)
+              .sort(([, a], [, b]) => b - a)
+              .map(([code, count]) => (
+                <span
+                  key={code}
+                  className="rounded-full border border-border bg-muted px-3 py-1 text-sm"
+                >
+                  <span className="mr-1">{LANG_FLAGS[code] ?? "🌐"}</span>
+                  <code className="text-xs">{code}</code> · {count}
+                </span>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {aggregate.top_phrases.length > 0 && (
+        <KeyPhrasesCard
+          phrases={aggregate.top_phrases}
+          title="Top phrases across batch"
+        />
+      )}
+
+      <div className="rounded-lg border border-border bg-background">
+        <div className="border-b border-border px-6 py-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Per-text results ({result.results.length})
+          </h3>
+        </div>
+        <ul className="divide-y divide-border">
+          {result.results.map((r, i) => (
+            <li key={i} className="px-6 py-4 text-sm">
+              <div className="flex items-center gap-3">
+                <span
+                  className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${
+                    r.label === "positive"
+                      ? "bg-green-100 text-green-800"
+                      : r.label === "negative"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {r.label}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {(r.confidence * 100).toFixed(0)}% ·{" "}
+                  {r.scores.compound.toFixed(2)}
+                </span>
+                {r.language && (
+                  <span className="text-xs text-muted-foreground">
+                    {LANG_FLAGS[r.language.code] ?? "🌐"} {r.language.code}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 line-clamp-2 text-foreground">
+                {originalLines[i] ?? ""}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Model: <code>{result.model}</code> · {aggregate.total} texts
+      </p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Shared UI
+// ---------------------------------------------------------------------------
+
+function LanguageChip({
+  language,
+}: {
+  language: { code: string; name: string; confidence: number };
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-sm">
+      <span className="rounded-full border border-border bg-muted px-3 py-1">
+        <span className="mr-1">{LANG_FLAGS[language.code] ?? "🌐"}</span>
+        Detected: <strong>{language.name}</strong>{" "}
+        <span className="text-muted-foreground">
+          ({language.code}) · {(language.confidence * 100).toFixed(0)}% confidence
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function KeyPhrasesCard({
+  phrases,
+  title,
+}: {
+  phrases: { phrase: string; weight: number }[];
+  title: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-background p-6">
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h3>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {phrases.map((kp) => (
+          <span
+            key={kp.phrase}
+            className="rounded-md border border-border bg-muted px-3 py-1 text-sm"
+            style={{ opacity: 0.4 + kp.weight * 0.6 }}
+          >
+            {kp.phrase}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ErrorCard({ error }: { error: string }) {
+  return (
+    <div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <p className="font-medium">Analysis failed</p>
+      <p className="mt-1">{error}</p>
+      <p className="mt-2 text-xs text-red-600">
+        Make sure the FastAPI backend is running at{" "}
+        <code>http://localhost:8000</code>.
       </p>
     </div>
   );
@@ -203,17 +511,21 @@ function ScoreBar({
   label,
   value,
   colour,
+  suffix,
 }: {
   label: string;
   value: number;
   colour: string;
+  suffix?: string;
 }) {
   const pct = Math.round(value * 100);
   return (
     <div>
       <div className="flex justify-between text-sm">
         <span>{label}</span>
-        <span className="text-muted-foreground">{pct}%</span>
+        <span className="text-muted-foreground">
+          {pct}%{suffix ? ` · ${suffix}` : ""}
+        </span>
       </div>
       <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
         <div className={`h-full ${colour}`} style={{ width: `${pct}%` }} />

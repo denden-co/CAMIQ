@@ -1,0 +1,28 @@
+{
+  "id": "in-2024-lok-sabha",
+  "country": "India",
+  "country_code": "IN",
+  "election_name": "2024 Indian General Election",
+  "election_type": "general",
+  "electoral_system": "fptp",
+  "date": "2024-06-01",
+  "languages": ["hi", "en", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "ur"],
+  "primary_language": "hi",
+  "parties": [
+    {"id": "bjp", "name": "Bharatiya Janata Party", "short": "BJP", "colour": "#FF9933"},
+    {"id": "inc", "name": "Indian National Congress", "short": "INC", "colour": "#19AAED"},
+    {"id": "aap", "name": "Aam Aadmi Party", "short": "AAP", "colour": "#019934"},
+    {"id": "tmc", "name": "All India Trinamool Congress", "short": "AITC", "colour": "#20C646"},
+    {"id": "dmk", "name": "Dravida Munnetra Kazhagam", "short": "DMK", "colour": "#E3000F"},
+    {"id": "sp", "name": "Samajwadi Party", "short": "SP", "colour": "#DA251D"},
+    {"id": "cpim", "name": "Communist Party of India (Marxist)", "short": "CPI(M)", "colour": "#EF1B23"},
+    {"id": "yrcp", "name": "YSR Congress Party", "short": "YSRCP", "colour": "#2A52BE"}
+  ],
+  "disclaimers": [
+    "India's 22 scheduled languages mean single-language sentiment analysis dramatically under-samples regional signal — multilingual models are essential.",
+    "FPTP at scale (543 constituencies) means national vote share poorly predicts seat counts — state-level alliances are decisive.",
+    "Twitter/X is heavily urban-skewed; rural voters (the majority) are under-represented in social listening."
+  ],
+  "sentiment_models_recommended": ["xlm-roberta", "ensemble"],
+  "total_constituencies": 543
+}

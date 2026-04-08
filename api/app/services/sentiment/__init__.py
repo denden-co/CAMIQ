@@ -27,9 +27,31 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from app.schemas.analyze import (
     AnalyzeResponse,
+    BatchAggregate,
+    BatchAnalyzeResponse,
+    DetectedLanguage,
     KeyPhrase,
     SentimentScores,
 )
+
+# ISO-639-1 → human name map for the languages XLM-R handles well + common EU
+# neighbours. Anything not in this map falls back to the uppercased code.
+_LANGUAGE_NAMES = {
+    "en": "English", "fr": "French", "es": "Spanish", "de": "German",
+    "it": "Italian", "pt": "Portuguese", "ar": "Arabic", "hi": "Hindi",
+    "nl": "Dutch", "pl": "Polish", "ro": "Romanian", "sv": "Swedish",
+    "da": "Danish", "fi": "Finnish", "no": "Norwegian", "cs": "Czech",
+    "hu": "Hungarian", "tr": "Turkish", "ru": "Russian", "uk": "Ukrainian",
+    "zh-cn": "Chinese (Simplified)", "zh-tw": "Chinese (Traditional)",
+    "ja": "Japanese", "ko": "Korean", "th": "Thai", "vi": "Vietnamese",
+    "id": "Indonesian", "ms": "Malay", "sw": "Swahili", "he": "Hebrew",
+    "bn": "Bengali", "ta": "Tamil", "te": "Telugu", "ur": "Urdu",
+    "fa": "Persian", "el": "Greek", "bg": "Bulgarian", "hr": "Croatian",
+    "sk": "Slovak", "sl": "Slovenian", "lt": "Lithuanian", "lv": "Latvian",
+    "et": "Estonian", "ca": "Catalan", "gl": "Galician", "eu": "Basque",
+    "cy": "Welsh", "ga": "Irish", "af": "Afrikaans", "sq": "Albanian",
+    "mk": "Macedonian", "so": "Somali", "tl": "Tagalog",
+}
 
 log = logging.getLogger(__name__)
 
@@ -99,6 +121,51 @@ def active_model_name() -> str:
 
 
 # ---------------------------------------------------------------------------
+# Language detection (optional, shared across backends)
+# ---------------------------------------------------------------------------
+
+
+@lru_cache(maxsize=1)
+def _langdetect_available() -> bool:
+    try:
+        import langdetect  # noqa: F401
+        from langdetect import DetectorFactory  # type: ignore
+
+        # langdetect is non-deterministic by default — seed it so the same
+        # text always returns the same code. Important for reproducibility
+        # when the same tweet is analysed twice.
+        DetectorFactory.seed = 0
+        return True
+    except ImportError:
+        return False
+
+
+def _detect_language(text: str) -> DetectedLanguage | None:
+    """Best-effort language detection. Returns None if langdetect missing.
+
+    langdetect returns an ISO-639-1 code; we map to a friendly name and
+    report the probability of the top-ranked candidate as confidence.
+    """
+    if not _langdetect_available():
+        return None
+    try:
+        from langdetect import detect_langs  # type: ignore
+
+        ranked = detect_langs(text)
+        if not ranked:
+            return None
+        top = ranked[0]
+        code = top.lang.lower()
+        return DetectedLanguage(
+            code=code,
+            name=_LANGUAGE_NAMES.get(code, code.upper()),
+            confidence=round(float(top.prob), 3),
+        )
+    except Exception:  # noqa: BLE001 — langdetect raises LangDetectException on empty/short input
+        return None
+
+
+# ---------------------------------------------------------------------------
 # Key-phrase extraction (shared by both backends)
 # ---------------------------------------------------------------------------
 
@@ -150,6 +217,7 @@ def _analyze_vader(text: str) -> AnalyzeResponse:
             compound=compound,
         ),
         key_phrases=_extract_key_phrases(text),
+        language=_detect_language(text),
         model="vader-lexicon-3.3.2",
         word_count=len(re.findall(r"\S+", text)),
         character_count=len(text),
@@ -197,6 +265,7 @@ def _analyze_xlmr(text: str, backend: dict) -> AnalyzeResponse:
             compound=compound,
         ),
         key_phrases=_extract_key_phrases(text),
+        language=_detect_language(text),
         model=_XLMR_MODEL_ID,
         word_count=len(re.findall(r"\S+", text)),
         character_count=len(text),
@@ -218,3 +287,71 @@ def analyze_text(text: str) -> AnalyzeResponse:
             # Never let a model blow up the request — fall back gracefully.
             log.exception("XLM-RoBERTa inference failed, falling back: %s", exc)
     return _analyze_vader(text)
+
+
+# ---------------------------------------------------------------------------
+# Batch analysis
+# ---------------------------------------------------------------------------
+
+
+def analyze_batch(texts: list[str]) -> BatchAnalyzeResponse:
+    """Analyse many texts and compute distribution + aggregate stats.
+
+    Per-item inference for now — straightforward and reuses the fallback
+    path. A later optimisation can pass the whole batch through XLM-R in
+    one forward pass for ~5-10x speedup on CPU.
+    """
+    results = [analyze_text(t) for t in texts if t and t.strip()]
+    total = len(results)
+
+    if total == 0:
+        # Defensive — route layer should have rejected this, but handle it.
+        return BatchAnalyzeResponse(
+            results=[],
+            aggregate=BatchAggregate(
+                total=0,
+                label_counts={"positive": 0, "neutral": 0, "negative": 0},
+                label_share={"positive": 0.0, "neutral": 0.0, "negative": 0.0},
+                mean_compound=0.0,
+                language_counts={},
+                top_phrases=[],
+            ),
+            model=active_model_name(),
+        )
+
+    label_counts = {"positive": 0, "neutral": 0, "negative": 0}
+    language_counts: Counter[str] = Counter()
+    phrase_totals: Counter[str] = Counter()
+    compound_sum = 0.0
+
+    for r in results:
+        label_counts[r.label] += 1
+        compound_sum += r.scores.compound
+        if r.language is not None:
+            language_counts[r.language.code] += 1
+        for kp in r.key_phrases:
+            # Weight by per-text weight so words dominant in multiple texts
+            # still outrank words dominant in one.
+            phrase_totals[kp.phrase] += kp.weight
+
+    label_share = {k: round(v / total, 3) for k, v in label_counts.items()}
+    mean_compound = round(compound_sum / total, 4)
+
+    top = phrase_totals.most_common(12)
+    max_weight = top[0][1] if top else 1.0
+    top_phrases = [
+        KeyPhrase(phrase=p, weight=round(w / max_weight, 3)) for p, w in top
+    ]
+
+    return BatchAnalyzeResponse(
+        results=results,
+        aggregate=BatchAggregate(
+            total=total,
+            label_counts=label_counts,
+            label_share=label_share,
+            mean_compound=mean_compound,
+            language_counts=dict(language_counts),
+            top_phrases=top_phrases,
+        ),
+        model=active_model_name(),
+    )

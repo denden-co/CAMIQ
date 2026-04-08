@@ -1,0 +1,27 @@
+{
+  "id": "de-2025-bundestag",
+  "country": "Germany",
+  "country_code": "DE",
+  "election_name": "2025 German Federal Election",
+  "election_type": "federal",
+  "electoral_system": "mmp",
+  "date": "2025-02-23",
+  "languages": ["de"],
+  "primary_language": "de",
+  "parties": [
+    {"id": "cdu", "name": "Christian Democratic Union", "short": "CDU/CSU", "colour": "#000000"},
+    {"id": "spd", "name": "Social Democratic Party", "short": "SPD", "colour": "#E3000F"},
+    {"id": "gru", "name": "Alliance 90/The Greens", "short": "Grüne", "colour": "#64A12D"},
+    {"id": "fdp", "name": "Free Democratic Party", "short": "FDP", "colour": "#FFED00"},
+    {"id": "afd", "name": "Alternative for Germany", "short": "AfD", "colour": "#009EE0"},
+    {"id": "lin", "name": "The Left", "short": "Die Linke", "colour": "#BE3075"},
+    {"id": "bsw", "name": "Sahra Wagenknecht Alliance", "short": "BSW", "colour": "#8B3A62"}
+  ],
+  "disclaimers": [
+    "Germany uses Mixed Member Proportional (MMP) with a 5% threshold — parties below 5% of the second vote receive no list seats.",
+    "Coalition dynamics shape outcomes as much as first-preference vote share — sentiment on coalition partners matters independently.",
+    "Regional strongholds (e.g. CSU in Bavaria, Linke/AfD in the east) mean national sentiment can mask decisive local swings."
+  ],
+  "sentiment_models_recommended": ["xlm-roberta", "ensemble"],
+  "total_constituencies": 299
+}

@@ -1,0 +1,26 @@
+{
+  "id": "ca-2025-federal",
+  "country": "Canada",
+  "country_code": "CA",
+  "election_name": "2025 Canadian Federal Election",
+  "election_type": "federal",
+  "electoral_system": "fptp",
+  "date": "2025-04-28",
+  "languages": ["en", "fr"],
+  "primary_language": "en",
+  "parties": [
+    {"id": "lib", "name": "Liberal Party", "short": "Lib", "colour": "#D71B1E"},
+    {"id": "cpc", "name": "Conservative Party", "short": "CPC", "colour": "#1A4782"},
+    {"id": "ndp", "name": "New Democratic Party", "short": "NDP", "colour": "#F58220"},
+    {"id": "bq", "name": "Bloc Québécois", "short": "BQ", "colour": "#0088CE"},
+    {"id": "grn", "name": "Green Party", "short": "GPC", "colour": "#3D9B35"},
+    {"id": "ppc", "name": "People's Party", "short": "PPC", "colour": "#472C83"}
+  ],
+  "disclaimers": [
+    "Canada's bilingual media environment means English-only sentiment misses Quebec — a province with its own party (Bloc Québécois) and distinct issue framing.",
+    "FPTP with four-plus viable parties produces heavy strategic voting — first-preference sentiment poorly predicts vote share.",
+    "Western alienation and regional identity mean national aggregates mask major prairie/BC divergences."
+  ],
+  "sentiment_models_recommended": ["xlm-roberta", "ensemble"],
+  "total_constituencies": 343
+}

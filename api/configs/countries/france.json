@@ -1,0 +1,27 @@
+{
+  "id": "fr-2027-presidential",
+  "country": "France",
+  "country_code": "FR",
+  "election_name": "2027 French Presidential Election",
+  "election_type": "presidential",
+  "electoral_system": "two_round",
+  "date": "2027-04-11",
+  "languages": ["fr"],
+  "primary_language": "fr",
+  "parties": [
+    {"id": "rn", "name": "National Rally", "short": "RN", "colour": "#0D378A"},
+    {"id": "ren", "name": "Renaissance", "short": "Ren", "colour": "#FFEB00"},
+    {"id": "lfi", "name": "La France Insoumise", "short": "LFI", "colour": "#CC2443"},
+    {"id": "lr", "name": "The Republicans", "short": "LR", "colour": "#0066CC"},
+    {"id": "ps", "name": "Socialist Party", "short": "PS", "colour": "#E7334B"},
+    {"id": "eelv", "name": "Europe Ecology – The Greens", "short": "EELV", "colour": "#77B82A"},
+    {"id": "rec", "name": "Reconquête", "short": "Rec", "colour": "#1C1C80"}
+  ],
+  "disclaimers": [
+    "France's two-round system means first-round sentiment predicts who qualifies, but second-round dynamics depend heavily on eliminated candidates' voter transfers.",
+    "Tactical voting (vote utile) significantly distorts first-round support — raw polling sentiment under-estimates eventual qualifiers.",
+    "Presidential sentiment is only loosely coupled to legislative sentiment given the separate election cycle."
+  ],
+  "sentiment_models_recommended": ["xlm-roberta", "ensemble"],
+  "total_constituencies": null
+}
