@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CountryProvider } from "@/lib/country-context";
 
 export const metadata: Metadata = {
   title: "CampaignIQ — Global Political Intelligence",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <CountryProvider>{children}</CountryProvider>
+      </body>
     </html>
   );
 }

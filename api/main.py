@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import analyze
+from app.routers import analyze, countries
 
 app = FastAPI(
     title="CampaignIQ API",
@@ -27,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(analyze.router, prefix="/api", tags=["analyze"])
+app.include_router(countries.router, prefix="/api", tags=["countries"])
 
 
 @app.get("/health")

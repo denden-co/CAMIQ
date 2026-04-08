@@ -4,10 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { CountryPicker } from "@/components/country-picker";
+import { useCountry } from "@/lib/country-context";
 
 // DEV-ONLY dashboard — reads mock user from localStorage.
 export default function DashboardPage() {
   const router = useRouter();
+  const { selected: country } = useCountry();
   const [user, setUser] = useState<{ email: string; fullName: string } | null>(
     null
   );
@@ -38,6 +41,7 @@ export default function DashboardPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <h1 className="text-xl font-bold">CampaignIQ</h1>
           <div className="flex items-center gap-4">
+            <CountryPicker />
             <span className="text-sm text-muted-foreground">
               {user?.email ?? "dev user"}
             </span>
@@ -55,6 +59,17 @@ export default function DashboardPage() {
         <p className="mt-2 text-muted-foreground">
           Your role:{" "}
           <span className="font-medium text-foreground">analyst</span>
+          {country && (
+            <>
+              {" · "}Focus:{" "}
+              <Link
+                href="/countries"
+                className="font-medium text-primary hover:underline"
+              >
+                {country.country} — {country.election_name}
+              </Link>
+            </>
+          )}
         </p>
 
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -87,7 +102,8 @@ export default function DashboardPage() {
           <DashboardCard
             title="Country Configuration"
             description="Configure parties, electoral system, languages"
-            status="Coming Phase 1"
+            status="Live"
+            href="/countries"
           />
         </div>
       </section>
