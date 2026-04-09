@@ -319,7 +319,31 @@ def extract_topics(
         total = len(doc_indices)
         label_share = {k: round(v / total, 4) for k, v in label_counts.items()}
         mean_compound = sum(compounds) / total
-        dominant = max(label_counts, key=label_counts.get)  # type: ignore[arg-type]
+        # Dominant label = majority by count, but tie-break by mean_compound
+        # so the reported lean can never disagree with the topic's sentiment
+        # score (e.g. 1/1/1 counts with mean_compound=-0.13 should lean
+        # 'negative', not whichever dict key sorts first).
+        top_count = max(label_counts.values())
+        tied = [lbl for lbl, c in label_counts.items() if c == top_count]
+        if len(tied) == 1:
+            dominant = tied[0]
+        elif mean_compound >= 0.05 and "positive" in tied:
+            dominant = "positive"
+        elif mean_compound <= -0.05 and "negative" in tied:
+            dominant = "negative"
+        elif "neutral" in tied:
+            dominant = "neutral"
+        else:
+            # All three tied and mean_compound in the neutral band —
+            # fall back to whichever tied label is closest to the mean.
+            dominant = max(
+                tied,
+                key=lambda lbl: (
+                    mean_compound if lbl == "positive"
+                    else -mean_compound if lbl == "negative"
+                    else -abs(mean_compound)
+                ),
+            )
 
         # Pick up to 3 representative samples — the ones whose compound score
         # is closest to the topic's mean compound, so the samples actually
