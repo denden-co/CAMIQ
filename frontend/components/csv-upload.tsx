@@ -109,7 +109,7 @@ export function CsvUpload({ onColumnSelected, maxRows = 500 }: Props) {
             Drop a CSV here, or click to choose a file
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            First row must be a header. We'll auto-pick the text column and
+            First row must be a header. We&apos;ll auto-pick the text column and
             let you change it before running.
           </p>
           <input
