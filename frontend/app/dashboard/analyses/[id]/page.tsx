@@ -1,8 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Button } from "@/components/ui/button";
 import {
   getAnalysis,
@@ -11,6 +22,12 @@ import {
   type Topic,
   type TopicModelResponse,
 } from "@/lib/api";
+
+const LEAN_COLORS: Record<string, string> = {
+  positive: "#16a34a", // green-600
+  neutral: "#9ca3af", // gray-400
+  negative: "#dc2626", // red-600
+};
 
 // Phase 3: saved analysis detail page with BERTopic topic modelling.
 export default function SavedAnalysisPage() {
@@ -150,7 +167,9 @@ export default function SavedAnalysisPage() {
                     assigned · {topics.outlier_documents} outliers
                   </p>
 
-                  <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <TopicCharts topics={topics.topics} />
+
+                  <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
                     {topics.topics.map((t) => (
                       <TopicCard key={t.id} topic={t} />
                     ))}
@@ -163,6 +182,130 @@ export default function SavedAnalysisPage() {
       </section>
     </main>
   );
+}
+
+function TopicCharts({ topics }: { topics: Topic[] }) {
+  // Size chart: doc_count per topic, colored by dominant lean.
+  const sizeData = useMemo(
+    () =>
+      topics.map((t) => ({
+        name: truncateLabel(t.label),
+        docs: t.doc_count,
+        lean: t.dominant_label,
+      })),
+    [topics]
+  );
+
+  // Stacked chart: share of positive / neutral / negative within each topic.
+  const stackData = useMemo(
+    () =>
+      topics.map((t) => ({
+        name: truncateLabel(t.label),
+        positive: Math.round((t.label_share.positive ?? 0) * 100),
+        neutral: Math.round((t.label_share.neutral ?? 0) * 100),
+        negative: Math.round((t.label_share.negative ?? 0) * 100),
+      })),
+    [topics]
+  );
+
+  if (topics.length === 0) return null;
+
+  return (
+    <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="rounded-lg border border-border bg-muted/20 p-4">
+        <h4 className="text-sm font-semibold">Topic size</h4>
+        <p className="text-xs text-muted-foreground">
+          Documents per topic, coloured by dominant sentiment lean.
+        </p>
+        <div className="mt-3 h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={sizeData}
+              layout="vertical"
+              margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis type="number" fontSize={11} />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={120}
+                fontSize={11}
+              />
+              <Tooltip
+                cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                contentStyle={{ fontSize: 12 }}
+                formatter={(value: number) => [`${value} docs`, "Size"]}
+              />
+              <Bar dataKey="docs" radius={[0, 4, 4, 0]}>
+                {sizeData.map((entry, idx) => (
+                  <Cell
+                    key={idx}
+                    fill={LEAN_COLORS[entry.lean] ?? LEAN_COLORS.neutral}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-border bg-muted/20 p-4">
+        <h4 className="text-sm font-semibold">Sentiment composition</h4>
+        <p className="text-xs text-muted-foreground">
+          Per-topic share of positive / neutral / negative documents.
+        </p>
+        <div className="mt-3 h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={stackData}
+              layout="vertical"
+              margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis
+                type="number"
+                domain={[0, 100]}
+                tickFormatter={(v) => `${v}%`}
+                fontSize={11}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={120}
+                fontSize={11}
+              />
+              <Tooltip
+                cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                contentStyle={{ fontSize: 12 }}
+                formatter={(value: number, name: string) => [
+                  `${value}%`,
+                  name,
+                ]}
+              />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar
+                dataKey="positive"
+                stackId="s"
+                fill={LEAN_COLORS.positive}
+              />
+              <Bar dataKey="neutral" stackId="s" fill={LEAN_COLORS.neutral} />
+              <Bar
+                dataKey="negative"
+                stackId="s"
+                fill={LEAN_COLORS.negative}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function truncateLabel(label: string, max = 22): string {
+  if (label.length <= max) return label;
+  return label.slice(0, max - 1) + "…";
 }
 
 function TopicCard({ topic }: { topic: Topic }) {
