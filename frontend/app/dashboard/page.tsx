@@ -189,6 +189,12 @@ export default function DashboardPage() {
                         {new Date(a.created_at).toLocaleString()}
                       </td>
                       <td className="px-4 py-2 text-right">
+                        <Link
+                          href={`/dashboard/analyses/${a.id}` as any}
+                          className="mr-3 text-xs text-primary hover:underline"
+                        >
+                          View · Topics
+                        </Link>
                         <button
                           type="button"
                           onClick={() => handleDeleteAnalysis(a.id, a.name)}

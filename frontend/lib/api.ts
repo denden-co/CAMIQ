@@ -247,3 +247,54 @@ export function getAnalysis(id: string): Promise<SavedAnalysis> {
 export function deleteAnalysis(id: string): Promise<void> {
   return authedJson<void>(`/api/analyses/${id}`, { method: "DELETE" });
 }
+
+// ---------------------------------------------------------------------------
+// Phase 3 — topic modelling on saved analyses
+// ---------------------------------------------------------------------------
+
+export interface TopicSample {
+  text: string;
+  label: SentimentLabel;
+  compound: number;
+}
+
+export interface Topic {
+  id: number;
+  label: string;
+  keywords: string[];
+  doc_count: number;
+  share: number;
+  mean_compound: number;
+  label_counts: Record<string, number>;
+  label_share: Record<string, number>;
+  dominant_label: SentimentLabel;
+  samples: TopicSample[];
+}
+
+export interface TopicModelResponse {
+  analysis_id: string;
+  total_documents: number;
+  assigned_documents: number;
+  outlier_documents: number;
+  topic_count: number;
+  backend: "bertopic" | "tfidf-kmeans";
+  topics: Topic[];
+}
+
+export interface TopicModelOptions {
+  n_topics?: number | null;
+  min_topic_size?: number;
+}
+
+export function getAnalysisTopics(
+  id: string,
+  options: TopicModelOptions = {}
+): Promise<TopicModelResponse> {
+  return authedJson<TopicModelResponse>(`/api/analyses/${id}/topics`, {
+    method: "POST",
+    body: JSON.stringify({
+      n_topics: options.n_topics ?? null,
+      min_topic_size: options.min_topic_size ?? 3,
+    }),
+  });
+}

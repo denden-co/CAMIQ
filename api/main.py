@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import analyses, analyze, countries
+from app.routers import analyses, analyze, countries, topics
 from app.services.sentiment import active_model_name
 
 app = FastAPI(
@@ -30,6 +30,7 @@ app.add_middleware(
 app.include_router(analyze.router, prefix="/api", tags=["analyze"])
 app.include_router(analyses.router, prefix="/api", tags=["analyses"])
 app.include_router(countries.router, prefix="/api", tags=["countries"])
+app.include_router(topics.router, prefix="/api", tags=["topics"])
 
 
 @app.get("/health")

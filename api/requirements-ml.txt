@@ -25,6 +25,9 @@ xgboost>=2.0.0
 # sentence-transformers + UMAP + HDBSCAN by default and does not require
 # gensim. Re-add under a Python 3.12 venv if/when we want Word2Vec or LDA.
 bertopic>=0.16.0
+# Pinned explicitly (transitive via bertopic, but we import it directly in
+# api/app/services/topics/__init__.py so we want it locked at our level).
+sentence-transformers>=2.7.0
 
 # Alt sentiment / text
 textblob>=0.18.0
