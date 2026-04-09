@@ -298,3 +298,84 @@ export function getAnalysisTopics(
     }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Phase 4 — bias & fairness audit on saved analyses
+// ---------------------------------------------------------------------------
+
+export type FairnessVerdict = "green" | "yellow" | "red";
+export type FairnessSeverity = "info" | "warning" | "alert";
+
+export interface LanguageGroupStats {
+  code: string;
+  name: string;
+  n: number;
+  share: number;
+  label_counts: Record<string, number>;
+  label_share: Record<string, number>;
+  mean_confidence: number;
+  mean_compound: number;
+  small_sample: boolean;
+}
+
+export interface ConfidenceDisparity {
+  min_group: string | null;
+  max_group: string | null;
+  min_mean_confidence: number | null;
+  max_mean_confidence: number | null;
+  disparity_ratio: number | null;
+  passes_four_fifths: boolean | null;
+}
+
+export interface ChiSquareTest {
+  computable: boolean;
+  reason: string | null;
+  chi2: number | null;
+  dof: number | null;
+  p_value: number | null;
+  significant: boolean | null;
+}
+
+export interface CorpusSkew {
+  dominant_label: string;
+  dominant_share: number;
+  skew_flag: boolean;
+}
+
+export interface FairnessFlag {
+  code: string;
+  severity: FairnessSeverity;
+  message: string;
+}
+
+export interface BiasAuditResponse {
+  analysis_id: string;
+  total_rows: number;
+  languages_detected: number;
+  min_group_size: number;
+  language_groups: LanguageGroupStats[];
+  confidence_disparity: ConfidenceDisparity;
+  chi_square: ChiSquareTest;
+  corpus_skew: CorpusSkew;
+  flags: FairnessFlag[];
+  verdict: FairnessVerdict;
+}
+
+export interface BiasAuditOptions {
+  min_group_size?: number;
+}
+
+export function getBiasAudit(
+  id: string,
+  options: BiasAuditOptions = {}
+): Promise<BiasAuditResponse> {
+  return authedJson<BiasAuditResponse>(
+    `/api/analyses/${id}/bias-audit`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        min_group_size: options.min_group_size ?? 5,
+      }),
+    }
+  );
+}

@@ -18,6 +18,11 @@ import { Button } from "@/components/ui/button";
 import {
   getAnalysis,
   getAnalysisTopics,
+  getBiasAudit,
+  type BiasAuditResponse,
+  type FairnessFlag,
+  type FairnessVerdict,
+  type LanguageGroupStats,
   type SavedAnalysis,
   type Topic,
   type TopicModelResponse,
@@ -46,6 +51,11 @@ export default function SavedAnalysisPage() {
   const [topicsLoading, setTopicsLoading] = useState(false);
   const [topicsError, setTopicsError] = useState<string | null>(null);
   const [nTopics, setNTopics] = useState<number>(6);
+
+  const [bias, setBias] = useState<BiasAuditResponse | null>(null);
+  const [biasLoading, setBiasLoading] = useState(false);
+  const [biasError, setBiasError] = useState<string | null>(null);
+  const [minGroupSize, setMinGroupSize] = useState<number>(5);
 
   useEffect(() => {
     if (!id) return;
@@ -79,6 +89,22 @@ export default function SavedAnalysisPage() {
       );
     } finally {
       setTopicsLoading(false);
+    }
+  }
+
+  async function runBias() {
+    if (!id) return;
+    setBiasLoading(true);
+    setBiasError(null);
+    try {
+      const result = await getBiasAudit(id, { min_group_size: minGroupSize });
+      setBias(result);
+    } catch (err) {
+      setBiasError(
+        err instanceof Error ? err.message : "Bias audit failed."
+      );
+    } finally {
+      setBiasLoading(false);
     }
   }
 
@@ -210,10 +236,346 @@ export default function SavedAnalysisPage() {
                 </div>
               )}
             </div>
+
+            <div className="mt-8 rounded-lg border border-border bg-background p-6">
+              <div className="flex items-end justify-between gap-4 flex-wrap">
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    Bias &amp; fairness audit
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Inspect how the sentiment model treats different language
+                    groups. Uses the 4/5ths rule for confidence parity, a
+                    chi-square independence test, and a corpus-skew check.
+                  </p>
+                </div>
+                <div className="flex items-end gap-3 print:hidden">
+                  <label className="text-sm">
+                    <span className="block text-muted-foreground">
+                      Min group size
+                    </span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={minGroupSize}
+                      onChange={(e) =>
+                        setMinGroupSize(
+                          Math.max(
+                            1,
+                            Math.min(100, Number(e.target.value) || 5)
+                          )
+                        )
+                      }
+                      className="mt-1 w-20 rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+                    />
+                  </label>
+                  <Button onClick={runBias} disabled={biasLoading}>
+                    {biasLoading ? "Auditing…" : "Run audit"}
+                  </Button>
+                </div>
+              </div>
+
+              {biasError && (
+                <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  {biasError}
+                </div>
+              )}
+
+              {bias && <BiasAuditView audit={bias} />}
+            </div>
           </>
         )}
       </section>
     </main>
+  );
+}
+
+const VERDICT_STYLES: Record<
+  FairnessVerdict,
+  { label: string; className: string }
+> = {
+  green: {
+    label: "Green — no major fairness concerns",
+    className: "bg-green-100 text-green-800 border-green-300",
+  },
+  yellow: {
+    label: "Yellow — warnings found, review recommended",
+    className: "bg-amber-100 text-amber-800 border-amber-300",
+  },
+  red: {
+    label: "Red — alerts raised, results may be unfair",
+    className: "bg-red-100 text-red-800 border-red-300",
+  },
+};
+
+const SEVERITY_STYLES: Record<FairnessFlag["severity"], string> = {
+  info: "border-blue-200 bg-blue-50 text-blue-800",
+  warning: "border-amber-200 bg-amber-50 text-amber-800",
+  alert: "border-red-200 bg-red-50 text-red-800",
+};
+
+function BiasAuditView({ audit }: { audit: BiasAuditResponse }) {
+  const verdict = VERDICT_STYLES[audit.verdict];
+
+  const confData = useMemo(
+    () =>
+      audit.language_groups
+        .filter((g) => !g.small_sample)
+        .map((g) => ({
+          name: g.code,
+          confidence: Math.round(g.mean_confidence * 100),
+        })),
+    [audit.language_groups]
+  );
+
+  const sizeData = useMemo(
+    () =>
+      audit.language_groups.map((g) => ({
+        name: g.code,
+        n: g.n,
+      })),
+    [audit.language_groups]
+  );
+
+  return (
+    <div className="mt-6 space-y-6">
+      <div
+        className={`rounded-md border px-4 py-3 text-sm font-medium ${verdict.className}`}
+      >
+        {verdict.label}
+      </div>
+
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">
+        {audit.total_rows} rows · {audit.languages_detected} language(s) · min
+        group size = {audit.min_group_size}
+      </p>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border border-border bg-muted/20 p-4">
+          <h4 className="text-sm font-semibold">Rows per language</h4>
+          <p className="text-xs text-muted-foreground">
+            Count of rows in each detected language group.
+          </p>
+          <div className="mt-3 h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={sizeData}
+                margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="name" fontSize={11} />
+                <YAxis fontSize={11} allowDecimals={false} />
+                <Tooltip contentStyle={{ fontSize: 12 }} />
+                <Bar dataKey="n" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border bg-muted/20 p-4">
+          <h4 className="text-sm font-semibold">Mean confidence (eligible)</h4>
+          <p className="text-xs text-muted-foreground">
+            Mean model confidence per language, for groups with n ≥{" "}
+            {audit.min_group_size}.
+          </p>
+          <div className="mt-3 h-56 w-full">
+            {confData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={confData}
+                  margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" fontSize={11} />
+                  <YAxis
+                    domain={[0, 100]}
+                    tickFormatter={(v) => `${v}%`}
+                    fontSize={11}
+                  />
+                  <Tooltip
+                    contentStyle={{ fontSize: 12 }}
+                    formatter={(value: number) => [`${value}%`, "Mean conf."]}
+                  />
+                  <Bar dataKey="confidence" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="p-4 text-xs text-muted-foreground">
+                No language group meets the minimum size threshold.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <StatCard label="4/5ths rule">
+          {audit.confidence_disparity.disparity_ratio !== null ? (
+            <>
+              <div className="text-2xl font-bold">
+                {audit.confidence_disparity.disparity_ratio.toFixed(2)}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {audit.confidence_disparity.min_group} vs{" "}
+                {audit.confidence_disparity.max_group} ·{" "}
+                {audit.confidence_disparity.passes_four_fifths
+                  ? "passes"
+                  : "fails"}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">Not computable.</p>
+          )}
+        </StatCard>
+
+        <StatCard label="Chi-square (label ⟂ lang)">
+          {audit.chi_square.computable && audit.chi_square.chi2 !== null ? (
+            <>
+              <div className="text-2xl font-bold">
+                χ² = {audit.chi_square.chi2.toFixed(2)}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                dof {audit.chi_square.dof}
+                {audit.chi_square.p_value !== null && (
+                  <> · p = {audit.chi_square.p_value.toFixed(4)}</>
+                )}
+                {audit.chi_square.significant !== null && (
+                  <>
+                    {" · "}
+                    {audit.chi_square.significant
+                      ? "significant"
+                      : "not significant"}
+                  </>
+                )}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {audit.chi_square.reason ?? "Not computable."}
+            </p>
+          )}
+        </StatCard>
+
+        <StatCard label="Corpus skew">
+          <div className="text-2xl font-bold capitalize">
+            {audit.corpus_skew.dominant_label}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {(audit.corpus_skew.dominant_share * 100).toFixed(0)}% of rows ·{" "}
+            {audit.corpus_skew.skew_flag ? "skewed" : "balanced"}
+          </p>
+        </StatCard>
+      </div>
+
+      <div>
+        <h4 className="mb-3 text-sm font-semibold">Language groups</h4>
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40 text-left">
+              <tr>
+                <th className="px-3 py-2 font-medium">Code</th>
+                <th className="px-3 py-2 font-medium">Name</th>
+                <th className="px-3 py-2 text-right font-medium">n</th>
+                <th className="px-3 py-2 text-right font-medium">Share</th>
+                <th className="px-3 py-2 text-right font-medium">
+                  Mean conf.
+                </th>
+                <th className="px-3 py-2 text-right font-medium">
+                  Mean comp.
+                </th>
+                <th className="px-3 py-2 text-right font-medium">+</th>
+                <th className="px-3 py-2 text-right font-medium">=</th>
+                <th className="px-3 py-2 text-right font-medium">−</th>
+              </tr>
+            </thead>
+            <tbody>
+              {audit.language_groups.map((g) => (
+                <LanguageRow key={g.code} group={g} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h4 className="mb-3 text-sm font-semibold">
+          Fairness flags ({audit.flags.length})
+        </h4>
+        {audit.flags.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No fairness concerns were raised on this batch.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {audit.flags.map((f) => (
+              <li
+                key={f.code}
+                className={`rounded-md border px-3 py-2 text-sm ${SEVERITY_STYLES[f.severity]}`}
+              >
+                <span className="font-mono text-xs uppercase tracking-wide">
+                  {f.severity}
+                </span>{" "}
+                · <span className="font-semibold">{f.code}</span> — {f.message}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-muted/20 p-4">
+      <div className="text-xs uppercase tracking-wide text-muted-foreground">
+        {label}
+      </div>
+      <div className="mt-2">{children}</div>
+    </div>
+  );
+}
+
+function LanguageRow({ group }: { group: LanguageGroupStats }) {
+  const pos = group.label_share.positive ?? 0;
+  const neu = group.label_share.neutral ?? 0;
+  const neg = group.label_share.negative ?? 0;
+  return (
+    <tr className="border-t border-border">
+      <td className="px-3 py-2 font-mono text-xs">{group.code}</td>
+      <td className="px-3 py-2">
+        {group.name}
+        {group.small_sample && (
+          <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium uppercase text-amber-800">
+            small
+          </span>
+        )}
+      </td>
+      <td className="px-3 py-2 text-right">{group.n}</td>
+      <td className="px-3 py-2 text-right">
+        {(group.share * 100).toFixed(0)}%
+      </td>
+      <td className="px-3 py-2 text-right">
+        {group.mean_confidence.toFixed(2)}
+      </td>
+      <td className="px-3 py-2 text-right">{group.mean_compound.toFixed(2)}</td>
+      <td className="px-3 py-2 text-right text-green-700">
+        {(pos * 100).toFixed(0)}%
+      </td>
+      <td className="px-3 py-2 text-right text-muted-foreground">
+        {(neu * 100).toFixed(0)}%
+      </td>
+      <td className="px-3 py-2 text-right text-red-700">
+        {(neg * 100).toFixed(0)}%
+      </td>
+    </tr>
   );
 }
 

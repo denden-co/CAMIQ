@@ -237,8 +237,9 @@ export default function DashboardPage() {
           />
           <DashboardCard
             title="Bias & Fairness Audit"
-            description="Detect and report on model bias across demographics"
-            status="Coming Phase 4"
+            description="Detect confidence disparities and label-language dependence on saved analyses"
+            status="Live"
+            href="/dashboard"
           />
           <DashboardCard
             title="Country Configuration"
