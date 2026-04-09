@@ -22,6 +22,11 @@ import {
   type Topic,
   type TopicModelResponse,
 } from "@/lib/api";
+import {
+  exportAnalysisCSV,
+  exportAnalysisJSON,
+  exportAnalysisPDF,
+} from "@/lib/export";
 
 const LEAN_COLORS: Record<string, string> = {
   positive: "#16a34a", // green-600
@@ -79,7 +84,7 @@ export default function SavedAnalysisPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <header className="border-b border-border">
+      <header className="border-b border-border print:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold">CampaignIQ</h1>
@@ -106,17 +111,45 @@ export default function SavedAnalysisPage() {
 
         {analysis && (
           <>
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold">{analysis.name}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {analysis.total} rows · dominant{" "}
-                <span className="font-medium capitalize text-foreground">
-                  {analysis.dominant_label}
-                </span>{" "}
-                · mean compound {analysis.mean_compound.toFixed(2)} ·{" "}
-                {analysis.languages_detected} language(s) · saved{" "}
-                {new Date(analysis.created_at).toLocaleString()}
-              </p>
+            <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <h2 className="text-3xl font-bold">{analysis.name}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {analysis.total} rows · dominant{" "}
+                  <span className="font-medium capitalize text-foreground">
+                    {analysis.dominant_label}
+                  </span>{" "}
+                  · mean compound {analysis.mean_compound.toFixed(2)} ·{" "}
+                  {analysis.languages_detected} language(s) · saved{" "}
+                  {new Date(analysis.created_at).toLocaleString()}
+                </p>
+              </div>
+              <div className="flex gap-2 print:hidden">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportAnalysisCSV(analysis)}
+                  title="Download one row per text as CSV"
+                >
+                  Export CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportAnalysisJSON(analysis, topics)}
+                  title="Download the full analysis (plus topics if run) as JSON"
+                >
+                  Export JSON
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportAnalysisPDF()}
+                  title="Open the browser print dialog — pick 'Save as PDF'"
+                >
+                  Export PDF
+                </Button>
+              </div>
             </div>
 
             <div className="rounded-lg border border-border bg-background p-6">
@@ -128,7 +161,7 @@ export default function SavedAnalysisPage() {
                     overlay the per-row sentiment lean.
                   </p>
                 </div>
-                <div className="flex items-end gap-3">
+                <div className="flex items-end gap-3 print:hidden">
                   <label className="text-sm">
                     <span className="block text-muted-foreground">
                       Target topics
