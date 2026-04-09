@@ -1,11 +1,11 @@
 {
-  "id": "usa-2024-presidential",
+  "id": "usa-2028-presidential",
   "country": "United States",
   "country_code": "US",
-  "election_name": "2024 US Presidential Election",
+  "election_name": "2028 US Presidential Election",
   "election_type": "presidential",
   "electoral_system": "electoral_college",
-  "date": "2024-11-05",
+  "date": "2028-11-07",
   "languages": ["en", "es"],
   "primary_language": "en",
   "parties": [
@@ -16,8 +16,9 @@
     {"id": "ind", "name": "Independent", "short": "Ind", "colour": "#808080"}
   ],
   "disclaimers": [
-    "The Electoral College means national popular sentiment does not directly determine the winner — swing state analysis is critical.",
-    "Social media sentiment may over-represent certain demographics and underrepresent others."
+    "The Electoral College means national popular sentiment does not determine the winner — swing-state analysis is decisive.",
+    "Primary calendars (Iowa, New Hampshire, Super Tuesday) drive candidate selection long before the general — sentiment windows should be segmented accordingly.",
+    "Social media sentiment over-represents urban and younger voters; sampling bias must be corrected before any seat or EV projection."
   ],
   "sentiment_models_recommended": ["bertweet", "roberta", "ensemble"],
   "total_electoral_votes": 538,

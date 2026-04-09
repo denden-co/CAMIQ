@@ -1,11 +1,11 @@
 {
-  "id": "in-2024-lok-sabha",
+  "id": "in-2029-lok-sabha",
   "country": "India",
   "country_code": "IN",
-  "election_name": "2024 Indian General Election",
+  "election_name": "Indian General Election (projected 2029)",
   "election_type": "general",
   "electoral_system": "fptp",
-  "date": "2024-06-01",
+  "date": "2029-04-15",
   "languages": ["hi", "en", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "ur"],
   "primary_language": "hi",
   "parties": [
@@ -19,8 +19,9 @@
     {"id": "yrcp", "name": "YSR Congress Party", "short": "YSRCP", "colour": "#2A52BE"}
   ],
   "disclaimers": [
+    "Date is projected — the 18th Lok Sabha's term runs until June 2029, so polling will almost certainly happen in the April–May 2029 window.",
     "India's 22 scheduled languages mean single-language sentiment analysis dramatically under-samples regional signal — multilingual models are essential.",
-    "FPTP at scale (543 constituencies) means national vote share poorly predicts seat counts — state-level alliances are decisive.",
+    "FPTP at scale (543 constituencies) means national vote share poorly predicts seat counts — state-level alliances (NDA/INDIA bloc) are decisive.",
     "Twitter/X is heavily urban-skewed; rural voters (the majority) are under-represented in social listening."
   ],
   "sentiment_models_recommended": ["xlm-roberta", "ensemble"],

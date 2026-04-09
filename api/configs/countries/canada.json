@@ -1,11 +1,11 @@
 {
-  "id": "ca-2025-federal",
+  "id": "ca-2029-federal",
   "country": "Canada",
   "country_code": "CA",
-  "election_name": "2025 Canadian Federal Election",
+  "election_name": "Canadian Federal Election (projected 2029)",
   "election_type": "federal",
   "electoral_system": "fptp",
-  "date": "2025-04-28",
+  "date": "2029-10-15",
   "languages": ["en", "fr"],
   "primary_language": "en",
   "parties": [
@@ -17,6 +17,7 @@
     {"id": "ppc", "name": "People's Party", "short": "PPC", "colour": "#472C83"}
   ],
   "disclaimers": [
+    "Date is projected — under Canada's fixed-date legislation the next federal election must be held by October 2029; a minority-government collapse could bring it forward.",
     "Canada's bilingual media environment means English-only sentiment misses Quebec — a province with its own party (Bloc Québécois) and distinct issue framing.",
     "FPTP with four-plus viable parties produces heavy strategic voting — first-preference sentiment poorly predicts vote share.",
     "Western alienation and regional identity mean national aggregates mask major prairie/BC divergences."
