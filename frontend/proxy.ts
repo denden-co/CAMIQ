@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 // DEV-ONLY mock auth — bypasses Supabase.
-// Swap back to the Supabase middleware (lib/supabase/middleware.ts)
+// Swap back to the Supabase proxy helper (lib/supabase/middleware.ts)
 // when you're ready to wire real auth again.
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const isAuthed = request.cookies.get("campaigniq_dev_auth")?.value === "1";
 
   if (!isAuthed && request.nextUrl.pathname.startsWith("/dashboard")) {
