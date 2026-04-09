@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 // DEV-ONLY mock login — bypasses Supabase.
 // Any non-empty email/password signs you in and drops a client cookie.
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,11 +24,13 @@ export default function LoginPage() {
       /* ignore — SSR or blocked storage */
     }
 
-    // Set the dev auth cookie the middleware checks for.
+    // Set the dev auth cookie the proxy checks for.
     document.cookie = "campaigniq_dev_auth=1; path=/; max-age=86400; samesite=lax";
 
-    router.push("/dashboard");
-    router.refresh();
+    // Hard navigation — ensures the cookie is present on the very next
+    // request so the proxy doesn't bounce us back to /login. router.push()
+    // is a soft client-side nav and can race the cookie under Next 16.
+    window.location.assign("/dashboard");
   }
 
   return (
