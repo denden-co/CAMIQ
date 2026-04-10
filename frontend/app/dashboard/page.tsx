@@ -228,7 +228,8 @@ export default function DashboardPage() {
           <DashboardCard
             title="Voter Personas"
             description="LLM-generated personas grounded in real conversation data"
-            status="Coming Phase 4"
+            status="Live"
+            href="/personas"
           />
           <DashboardCard
             title="AI Strategic Advisor"

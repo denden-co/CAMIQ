@@ -3,7 +3,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import analyses, analyze, bias, countries, topics
+from dotenv import load_dotenv
+
+load_dotenv()  # Load .env before anything reads os.getenv
+
+from app.routers import analyses, analyze, bias, countries, personas, topics
+from app.services.llm import available_providers
 from app.services.sentiment import active_model_name
 
 app = FastAPI(
@@ -32,6 +37,13 @@ app.include_router(analyses.router, prefix="/api", tags=["analyses"])
 app.include_router(countries.router, prefix="/api", tags=["countries"])
 app.include_router(topics.router, prefix="/api", tags=["topics"])
 app.include_router(bias.router, prefix="/api", tags=["bias"])
+app.include_router(personas.router, prefix="/api", tags=["personas"])
+
+
+@app.get("/api/llm/providers")
+async def llm_providers():
+    """Return which LLM providers have API keys configured."""
+    return {"providers": available_providers()}
 
 
 @app.get("/health")
@@ -40,4 +52,5 @@ async def health_check():
         "status": "ok",
         "version": "0.1.0",
         "sentiment_model": active_model_name(),
+        "llm_providers": available_providers(),
     }

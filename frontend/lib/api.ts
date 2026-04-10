@@ -379,3 +379,74 @@ export function getBiasAudit(
     }
   );
 }
+
+// ---------------------------------------------------------------------------
+// Phase 4 — voter personas (LLM-generated from saved analyses)
+// ---------------------------------------------------------------------------
+
+export interface PersonaTrait {
+  trait: string;
+  description: string;
+}
+
+export interface PersonaProfile {
+  name: string;
+  age: number;
+  gender: string;
+  location: string;
+  occupation: string;
+  education: string;
+  income_bracket: string;
+  political_leaning: string;
+  top_issues: string[];
+  sentiment_alignment: SentimentLabel;
+  confidence_level: number;
+  narrative: string;
+  media_diet: string[];
+  persuadability: string;
+  messaging_angles: string[];
+  traits: PersonaTrait[];
+}
+
+export interface PersonasResponse {
+  analysis_id: string;
+  total_rows: number;
+  personas: PersonaProfile[];
+  grounding_summary: string;
+  provider: string;
+  model: string;
+}
+
+export interface PersonaOptions {
+  count?: number;
+  country?: string | null;
+  election?: string | null;
+  demographics_hint?: string | null;
+  provider?: string | null;
+  model?: string | null;
+}
+
+export function generatePersonas(
+  id: string,
+  options: PersonaOptions = {}
+): Promise<PersonasResponse> {
+  return authedJson<PersonasResponse>(`/api/analyses/${id}/personas`, {
+    method: "POST",
+    body: JSON.stringify({
+      count: options.count ?? 3,
+      country: options.country ?? null,
+      election: options.election ?? null,
+      demographics_hint: options.demographics_hint ?? null,
+      provider: options.provider ?? null,
+      model: options.model ?? null,
+    }),
+  });
+}
+
+export interface LLMProvidersResponse {
+  providers: string[];
+}
+
+export function getLLMProviders(): Promise<LLMProvidersResponse> {
+  return get<LLMProvidersResponse>("/api/llm/providers");
+}
