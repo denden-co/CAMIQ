@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Load .env before anything reads os.getenv
 
-from app.routers import analyses, analyze, bias, countries, personas, topics
+from app.routers import analyses, analyze, bias, countries, personas, strategy, topics
 from app.services.llm import available_providers
 from app.services.sentiment import active_model_name
 
@@ -38,6 +38,7 @@ app.include_router(countries.router, prefix="/api", tags=["countries"])
 app.include_router(topics.router, prefix="/api", tags=["topics"])
 app.include_router(bias.router, prefix="/api", tags=["bias"])
 app.include_router(personas.router, prefix="/api", tags=["personas"])
+app.include_router(strategy.router, prefix="/api", tags=["strategy"])
 
 
 @app.get("/api/llm/providers")

@@ -2,50 +2,99 @@
 
 ## Last shipped
 
-**Phase 4: Voter Personas module — built and sandbox-verified** on 2026-04-10.
+**Phase 4: COMPLETE — All modules LIVE-TESTED including multi-language Bias Audit** on 2026-04-10.
 
-### New files created
+### AI Strategic Advisor — live test results
+- POST `/api/analyses/{id}/strategy` working end-to-end
+- Generated 6 recommendations from saved analysis (8 rows, positive dominant, target: Labour)
+- Categories: Messaging, Targeting, Risk Mitigation, Resource Allocation, Digital Strategy
+- Priority levels rendered (High/Medium/Low with colour-coded badges)
+- Executive summary, risk factors, bias caveat all displayed correctly
+- Provider: google / Model: gemini-2.0-flash
+
+### Strategic Advisor files (new this session)
+- `api/app/schemas/strategy.py` — Pydantic schemas
+- `api/app/services/strategy.py` — Strategy generation service
+- `api/app/routers/strategy.py` — POST `/api/analyses/{id}/strategy`
+- `frontend/app/strategy/page.tsx` — Full strategy page with recommendation cards
+- `frontend/lib/api.ts` — Strategy types + generateStrategy()
+- `frontend/app/dashboard/page.tsx` — Strategic Advisor card now "Live"
+- `api/main.py` — Strategy router registered
+- `start-dev-backend.command` — Helper to kill port 8000 + restart backend
+
+### Voter Personas — live test results (previous session)
+- Generated 3 personas from saved analysis (8 rows, positive dominant)
+- All persona cards rendered correctly
+
+### Personas files (previous session)
 - `api/app/services/llm.py` — Multi-provider LLM abstraction layer
-  (Google Gemini, OpenAI, Anthropic, Deepseek, Mistral, Cohere, custom OpenAI-compatible)
-- `api/app/schemas/personas.py` — Pydantic schemas (PersonaRequest, PersonaProfile, PersonasResponse)
-- `api/app/services/personas.py` — Persona generation service (data summariser, prompt builder, JSON parser)
-- `api/app/routers/personas.py` — POST `/api/analyses/{id}/personas` endpoint
-- `api/.env` — API key config file (all keys blank, user needs to fill one)
-- `frontend/app/personas/page.tsx` — Full personas page with analysis picker, config form, persona cards
+- `api/app/schemas/personas.py` — Pydantic schemas
+- `api/app/services/personas.py` — Persona generation service
+- `api/app/routers/personas.py` — POST `/api/analyses/{id}/personas`
+- `api/.env` — Google Gemini API key (gemini-2.0-flash, free tier)
+- `frontend/app/personas/page.tsx` — Full personas page
 
-### Modified files
-- `api/main.py` — Added dotenv load, personas router, `/api/llm/providers` endpoint, llm_providers in /health
-- `frontend/lib/api.ts` — Added PersonaProfile, PersonasResponse types + `generatePersonas()` + `getLLMProviders()`
-- `frontend/app/dashboard/page.tsx` — Voter Personas card: "Coming Phase 4" → "Live" with `/personas` link
+### Multi-language Bias Audit — live test results
+- Created `multi-lang-test.csv` with 32 political texts in 8 languages (en, fr, es, de, pt, it, ar, ja)
+- Batch analysis ran successfully via API — all 8 languages detected
+- Saved as "Multi-language test (8 langs, 32 rows)" (ID: 2fe6a9bbba7b)
+- Bias audit results:
+  - **Verdict: Green** — no significant issues
+  - Fairness flag: SMALL_GROUPS (de=4, pt=3, it=3, ar=2, ja=2)
+  - Confidence Parity: EN (71.2%) vs FR (86.1%), ratio 82.7% — **PASSES** ≥ 80%
+  - Chi-Square: not computable (expected cell count below Cochran threshold due to small groups)
+  - Corpus Skew: positive at 50% — **Balanced**
+  - All 8 language groups shown in breakdown table with counts, shares, sentiment splits, mean confidence/compound
+- Built `frontend/app/bias/page.tsx` — full audit UI with verdict banner, flags, confidence parity, chi-square, corpus skew, language group table
+- Fixed layout spacing (tightened section gaps from space-y-8 to space-y-6, reduced padding)
 
-### Verified in sandbox
-- Backend starts, all routes registered including `/api/analyses/{id}/personas`
-- `/health` returns `llm_providers: []` (expected — no keys set yet)
-- `/api/llm/providers` returns `{providers: []}` correctly
-- Schemas validate (PersonaRequest, PersonaProfile, PersonasResponse)
+### Phase 5: Responsive & Polish (completed)
+- Created shared `Spinner` component (`frontend/components/spinner.tsx`) with animated SVG spinner + `LoadingBlock` helper
+- Created shared `AppHeader` component (`frontend/components/app-header.tsx`) for consistent responsive headers
+- Made ALL page headers responsive: smaller text/padding on mobile (`text-lg sm:text-xl`, `px-4 sm:px-6`, `py-3 sm:py-4`)
+- Made ALL page sections responsive: reduced padding on mobile (`px-4 py-8 sm:px-6 sm:py-12`)
+- Made ALL page titles responsive: `text-2xl sm:text-3xl`
+- Added animated Spinner to loading buttons on: Analyze (single + batch), Bias Audit, Personas, Strategy
+- Added Spinner to dashboard analyses loading state
+- Dashboard header: email hidden on mobile (`hidden sm:inline`), flex-wrap for graceful overflow
+- Analyze page: compact tab labels on mobile (Single/Batch/CSV), smaller text (`text-xs sm:text-sm`)
+- Landing page: responsive title (`text-3xl sm:text-5xl lg:text-6xl`), stacked buttons on mobile (`flex-col sm:flex-row`)
+- Module cards grid: tighter gap on mobile (`gap-4 sm:gap-6`)
+- Zero console errors across all pages
+
+### Phase 6: Premium UI Redesign (completed)
+- Complete visual identity overhaul inspired by Quorum Analytics + Linear + Vercel aesthetic
+- New colour palette: indigo-violet primary, cyan accent, emerald success, with gradient system
+- Inter font loaded via next/font/google for professional typography
+- New `globals.css` with component classes: `.card-glass`, `.gradient-border`, `.text-gradient`, `.btn-gradient`, `.input-refined`, `.hero-mesh`, `.nav-bar`, `.table-premium`, `.stat-badge`, `.divider-gradient`
+- New `tailwind.config.ts` with extended colour tokens (card, accent, success, warning, danger, ring) and custom shadows (glow, soft, card, card-hover)
+- Landing page: mesh gradient hero with decorative orbs, feature grid (6 cards), animated badge, gradient text
+- Login page: glass card over hero-mesh background, refined form inputs
+- Dashboard: sticky nav bar with glass effect, gradient welcome banner, module cards with per-category colour gradients and hover lift, premium data table
+- New `PageShell` component (`components/page-shell.tsx`) for consistent nav + header across all module pages
+- All module pages (analyze, bias, personas, strategy, countries) now use PageShell
+- Analyze page: gradient tab switcher, refined stat cards, premium per-text results list
+- Bias audit: gradient verdict banner, stat badges, premium table styling
+- Personas: gradient confidence bars, provider status chips, themed tag system
+- Strategy: icon-backed recommendation cards, executive summary highlight, action steps
+- Countries: party cards with colour accent strips, stat grid
+- Analysis detail page: sticky nav, premium topic cards, Recharts with updated colour tokens
+- Button component upgraded: gradient default variant, rounded-lg, font-semibold, ring-offset focus
+- All form inputs use `.input-refined` class (rounded-lg, shadow-sm, gradient focus ring)
+- TypeScript passes with zero errors across all files
 
 ## Where we stopped
 
-Voter Personas module is **built but needs a live LLM test**. The user needs to:
-1. Add at least one API key to `api/.env` (Google Gemini free tier is easiest)
-2. Restart the backend
-3. Navigate to `/personas`, pick a saved analysis, generate personas
+**Phase 6 UI redesign is complete.** All modules are live, mobile-friendly, and visually premium:
+- Batch & CSV Analysis, Single Text Analysis, Country Configuration (Phase 1-2)
+- Saved Analyses + Topic Modelling (Phase 3)
+- Bias & Fairness Audit, Voter Personas, AI Strategic Advisor (Phase 4)
+- Multi-language analysis tested end-to-end across all modules
+- Responsive layouts + loading spinners across all pages (Phase 5)
 
 ## Next session — resume plan
 
-1. **Live test Voter Personas** — Add an API key, restart backend, generate
-   personas from the existing saved analysis in the browser. Debug any issues.
-
-2. **Build Phase 4: AI Strategic Advisor** — Multi-LLM strategy recommendations.
-   Still marked COMING PHASE 4 on the dashboard.
-   - Backend: `POST /api/strategy` — takes analysis + optional topics/bias → LLM → recommendations
-   - Frontend: strategy page with analysis selector and recommendation display
-   - Reuses the `llm.py` abstraction layer already built
-
-3. **Run a multi-language analysis** to get a more interesting bias audit
-   (triggers chi-square, 4/5ths rule, and potentially yellow/red verdicts).
-
-4. **Phase 5: Polish & Ship** — responsive design, loading states, deployment.
+1. **Deployment** — Vercel for frontend, Railway/Render for API, environment config
 
 ## Known issues
 
@@ -56,10 +105,12 @@ Voter Personas module is **built but needs a live LLM test**. The user needs to:
 
 ## Active todos at break time
 
-1. [completed] Build Voter Personas module (LLM abstraction + backend + frontend)
-2. [pending] Live-test Voter Personas with real API key
-3. [pending] Build AI Strategic Advisor module
-4. [pending] Multi-language analysis for richer audit results
+1. [completed] Build Voter Personas module
+2. [completed] Live-test Voter Personas with real API key
+3. [completed] Build + live-test AI Strategic Advisor module
+4. [completed] Multi-language analysis + bias audit UI built and tested
+5. [completed] Phase 5: Responsive polish + loading spinners
+6. [pending] Deployment — Vercel + Railway/Render
 
 ## User notes
 

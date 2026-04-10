@@ -11,8 +11,59 @@ import {
   listAnalyses,
   type AnalysisSummary,
 } from "@/lib/api";
+import { Spinner } from "@/components/spinner";
 
-// DEV-ONLY dashboard — reads mock user from localStorage.
+const MODULE_CARDS = [
+  {
+    title: "Batch & CSV Analysis",
+    desc: "Upload a CSV or paste rows — multilingual sentiment, language mix, top phrases",
+    href: "/analyze",
+    icon: "📊",
+    gradient: "from-blue-500/10 to-indigo-500/10",
+    iconBg: "bg-blue-500/10 text-blue-600",
+  },
+  {
+    title: "Single Text Analysis",
+    desc: "Analyse any text — speech, manifesto, post — instantly",
+    href: "/analyze",
+    icon: "✍️",
+    gradient: "from-violet-500/10 to-purple-500/10",
+    iconBg: "bg-violet-500/10 text-violet-600",
+  },
+  {
+    title: "Voter Personas",
+    desc: "LLM-generated personas grounded in real conversation data",
+    href: "/personas",
+    icon: "👥",
+    gradient: "from-emerald-500/10 to-teal-500/10",
+    iconBg: "bg-emerald-500/10 text-emerald-600",
+  },
+  {
+    title: "AI Strategic Advisor",
+    desc: "Multi-LLM strategy recommendations from your data",
+    href: "/strategy",
+    icon: "🧠",
+    gradient: "from-amber-500/10 to-orange-500/10",
+    iconBg: "bg-amber-500/10 text-amber-600",
+  },
+  {
+    title: "Bias & Fairness Audit",
+    desc: "Detect confidence disparities and label-language dependence",
+    href: "/bias",
+    icon: "⚖️",
+    gradient: "from-rose-500/10 to-pink-500/10",
+    iconBg: "bg-rose-500/10 text-rose-600",
+  },
+  {
+    title: "Country Configuration",
+    desc: "Configure parties, electoral system, languages",
+    href: "/countries",
+    icon: "🌍",
+    gradient: "from-cyan-500/10 to-sky-500/10",
+    iconBg: "bg-cyan-500/10 text-cyan-600",
+  },
+];
+
 export default function DashboardPage() {
   const router = useRouter();
   const { selected: country } = useCountry();
@@ -79,12 +130,15 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <h1 className="text-xl font-bold">CampaignIQ</h1>
-          <div className="flex items-center gap-4">
+      {/* ── Nav bar ───────────────────────────────── */}
+      <header className="nav-bar sticky top-0 z-40">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8 sm:py-4">
+          <Link href="/dashboard" className="text-lg font-bold tracking-tight">
+            Campaign<span className="text-gradient">IQ</span>
+          </Link>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <CountryPicker />
-            <span className="text-sm text-muted-foreground">
+            <span className="hidden text-sm text-muted-foreground sm:inline">
               {user?.email ?? "dev user"}
             </span>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
@@ -94,111 +148,119 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-6 py-12">
-        <h2 className="text-3xl font-bold">
-          Welcome{user?.fullName ? `, ${user.fullName}` : ""}
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          Your role:{" "}
-          <span className="font-medium text-foreground">analyst</span>
-          {country && (
-            <>
-              {" · "}Focus:{" "}
-              <Link
-                href="/countries"
-                className="font-medium text-primary hover:underline"
-              >
-                {country.country} — {country.election_name}
-              </Link>
-            </>
-          )}
-        </p>
+      {/* ── Hero banner ───────────────────────────── */}
+      <section className="border-b border-border/40 bg-gradient-to-br from-primary/[0.04] via-transparent to-accent/[0.03]">
+        <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Welcome{user?.fullName ? `, ${user.fullName}` : ""}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Your role:{" "}
+            <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+              Analyst
+            </span>
+            {country && (
+              <>
+                {" · "}
+                <Link
+                  href="/countries"
+                  className="font-medium text-primary hover:underline"
+                >
+                  {country.country} — {country.election_name}
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
+      </section>
 
-        <div className="mt-12">
+      <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
+        {/* ── Recent Analyses ─────────────────────── */}
+        <div>
           <div className="mb-4 flex items-baseline justify-between">
-            <h3 className="text-lg font-semibold">Recent Analyses</h3>
+            <h3 className="text-lg font-bold text-foreground">
+              Recent Analyses
+            </h3>
             <Link
               href="/analyze"
-              className="text-sm text-primary hover:underline"
+              className="text-sm font-medium text-primary hover:underline"
             >
               New analysis →
             </Link>
           </div>
+
           {analysesLoading && (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+              <Spinner className="h-4 w-4" /> Loading saved analyses…
+            </div>
           )}
+
           {analysesError && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               {analysesError}
             </div>
           )}
-          {!analysesLoading && !analysesError && analyses && analyses.length === 0 && (
-            <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
-              No saved analyses yet. Run a batch or CSV on the{" "}
-              <Link href="/analyze" className="text-primary hover:underline">
-                Analyse page
-              </Link>{" "}
-              and hit <strong>Save analysis</strong>.
-            </div>
-          )}
+
+          {!analysesLoading &&
+            !analysesError &&
+            analyses &&
+            analyses.length === 0 && (
+              <div className="rounded-xl border border-dashed border-border bg-muted/20 p-10 text-center text-sm text-muted-foreground">
+                No saved analyses yet. Run a batch or CSV on the{" "}
+                <Link
+                  href="/analyze"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Analyse page
+                </Link>{" "}
+                and hit <strong>Save analysis</strong>.
+              </div>
+            )}
+
           {analyses && analyses.length > 0 && (
-            <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50">
+            <div className="overflow-x-auto rounded-xl border border-border/60 bg-white shadow-soft">
+              <table className="table-premium w-full">
+                <thead>
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-muted-foreground">
-                      Name
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-muted-foreground">
-                      Source
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-muted-foreground">
-                      Rows
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-muted-foreground">
-                      Dominant
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-muted-foreground">
-                      Mean
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-muted-foreground">
-                      Languages
-                    </th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-muted-foreground">
-                      Saved
-                    </th>
-                    <th className="px-4 py-2" />
+                    <th>Name</th>
+                    <th>Source</th>
+                    <th>Rows</th>
+                    <th>Dominant</th>
+                    <th>Mean</th>
+                    <th>Languages</th>
+                    <th>Saved</th>
+                    <th />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody>
                   {analyses.map((a) => (
                     <tr key={a.id}>
-                      <td className="px-4 py-2 font-medium">{a.name}</td>
-                      <td className="px-4 py-2 text-muted-foreground">
-                        {a.source}
+                      <td className="font-medium">{a.name}</td>
+                      <td className="text-muted-foreground">{a.source}</td>
+                      <td>{a.total}</td>
+                      <td>
+                        <span className="stat-badge bg-primary/10 text-primary capitalize">
+                          {a.dominant_label}
+                        </span>
                       </td>
-                      <td className="px-4 py-2">{a.total}</td>
-                      <td className="px-4 py-2 capitalize">
-                        {a.dominant_label}
-                      </td>
-                      <td className="px-4 py-2">
+                      <td className="font-mono text-xs">
                         {a.mean_compound.toFixed(2)}
                       </td>
-                      <td className="px-4 py-2">{a.languages_detected}</td>
-                      <td className="px-4 py-2 text-muted-foreground">
+                      <td>{a.languages_detected}</td>
+                      <td className="text-muted-foreground text-xs">
                         {new Date(a.created_at).toLocaleString()}
                       </td>
-                      <td className="px-4 py-2 text-right">
+                      <td className="text-right">
                         <Link
                           href={`/dashboard/analyses/${a.id}` as any}
-                          className="mr-3 text-xs text-primary hover:underline"
+                          className="mr-3 text-xs font-medium text-primary hover:underline"
                         >
                           View · Topics
                         </Link>
                         <button
                           type="button"
                           onClick={() => handleDeleteAnalysis(a.id, a.name)}
-                          className="text-xs text-red-600 hover:underline"
+                          className="text-xs font-medium text-danger hover:underline"
                         >
                           Delete
                         </button>
@@ -211,78 +273,38 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <h3 className="mt-12 text-lg font-semibold">Modules</h3>
-        <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <DashboardCard
-            title="Batch & CSV Analysis"
-            description="Upload a CSV or paste rows — multilingual sentiment, language mix, top phrases"
-            status="Live"
-            href="/analyze"
-          />
-          <DashboardCard
-            title="Single Text Analysis"
-            description="Analyse any text — speech, manifesto, post — instantly"
-            status="Live"
-            href="/analyze"
-          />
-          <DashboardCard
-            title="Voter Personas"
-            description="LLM-generated personas grounded in real conversation data"
-            status="Live"
-            href="/personas"
-          />
-          <DashboardCard
-            title="AI Strategic Advisor"
-            description="Multi-LLM strategy recommendations from your data"
-            status="Coming Phase 4"
-          />
-          <DashboardCard
-            title="Bias & Fairness Audit"
-            description="Detect confidence disparities and label-language dependence on saved analyses"
-            status="Live"
-            href="/dashboard"
-          />
-          <DashboardCard
-            title="Country Configuration"
-            description="Configure parties, electoral system, languages"
-            status="Live"
-            href="/countries"
-          />
+        {/* ── Module cards ────────────────────────── */}
+        <div className="mt-12">
+          <h3 className="text-lg font-bold text-foreground">Modules</h3>
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+            {MODULE_CARDS.map((m) => (
+              <Link key={m.title} href={m.href as any}>
+                <div
+                  className={`group relative h-full overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br ${m.gradient} p-6 shadow-soft transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 hover:border-primary/20`}
+                >
+                  <div
+                    className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${m.iconBg} text-lg`}
+                  >
+                    {m.icon}
+                  </div>
+                  <h4 className="font-semibold text-foreground">
+                    {m.title}
+                  </h4>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    {m.desc}
+                  </p>
+                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                    Open module
+                    <span className="transition-transform group-hover:translate-x-0.5">
+                      →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-      </section>
+      </div>
     </main>
   );
-}
-
-function DashboardCard({
-  title,
-  description,
-  status,
-  href,
-}: {
-  title: string;
-  description: string;
-  status: string;
-  href?: string;
-}) {
-  const isLive = status.toLowerCase() === "live";
-  const body = (
-    <div
-      className={`h-full rounded-lg border border-border bg-background p-6 shadow-sm transition ${
-        href ? "hover:border-primary hover:shadow-md" : ""
-      }`}
-    >
-      <h3 className="font-semibold">{title}</h3>
-      <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-      <p
-        className={`mt-4 text-xs uppercase tracking-wide ${
-          isLive ? "text-green-600" : "text-primary"
-        }`}
-      >
-        {status}
-      </p>
-    </div>
-  );
-
-  return href ? <Link href={href as any}>{body}</Link> : body;
 }

@@ -443,6 +443,55 @@ export function generatePersonas(
   });
 }
 
+// ---------------------------------------------------------------------------
+// Phase 4 — AI Strategic Advisor (LLM-generated from saved analyses)
+// ---------------------------------------------------------------------------
+
+export interface StrategyRecommendation {
+  category: string;
+  title: string;
+  rationale: string;
+  actions: string[];
+  priority: string;
+  sentiment_link: string;
+}
+
+export interface StrategyResponse {
+  analysis_id: string;
+  total_rows: number;
+  executive_summary: string;
+  recommendations: StrategyRecommendation[];
+  risk_factors: string[];
+  bias_caveat: string | null;
+  grounding_summary: string;
+  provider: string;
+  model: string;
+}
+
+export interface StrategyOptions {
+  focus_topics?: string[] | null;
+  target_party?: string | null;
+  bias_awareness?: boolean;
+  provider?: string | null;
+  model?: string | null;
+}
+
+export function generateStrategy(
+  id: string,
+  options: StrategyOptions = {}
+): Promise<StrategyResponse> {
+  return authedJson<StrategyResponse>(`/api/analyses/${id}/strategy`, {
+    method: "POST",
+    body: JSON.stringify({
+      focus_topics: options.focus_topics ?? null,
+      target_party: options.target_party ?? null,
+      bias_awareness: options.bias_awareness ?? true,
+      provider: options.provider ?? null,
+      model: options.model ?? null,
+    }),
+  });
+}
+
 export interface LLMProvidersResponse {
   providers: string[];
 }

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CsvUpload } from "@/components/csv-upload";
 import { useCountry } from "@/lib/country-context";
+import { Spinner } from "@/components/spinner";
+import { PageShell } from "@/components/page-shell";
 import {
   analyzeBatch,
   analyzeText,
@@ -28,7 +29,6 @@ const BATCH_SAMPLE = [
   "Die Regierung hat die Wähler zutiefst enttäuscht.",
 ].join("\n");
 
-// ISO-639-1 → flag emoji map. Falls back to globe for unknowns.
 const LANG_FLAGS: Record<string, string> = {
   en: "🇬🇧", fr: "🇫🇷", es: "🇪🇸", de: "🇩🇪", it: "🇮🇹",
   pt: "🇵🇹", ar: "🇸🇦", hi: "🇮🇳", nl: "🇳🇱", pl: "🇵🇱",
@@ -46,74 +46,35 @@ export default function AnalyzePage() {
   const { selected: country } = useCountry();
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Link href="/dashboard" className="text-xl font-bold">
-            CampaignIQ
-          </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Back to dashboard
-          </Link>
-        </div>
-      </header>
-
-      <section className="mx-auto max-w-5xl px-6 py-12">
-        <h1 className="text-3xl font-bold">Text Analysis</h1>
-        <p className="mt-2 text-muted-foreground">
-          Paste any piece of text — a speech, a tweet, a manifesto excerpt — or
-          drop a whole list. Multilingual sentiment, key phrases, and aggregate
-          stats in one call.
-        </p>
-
-        <div className="mt-6 inline-flex rounded-md border border-border p-1">
+    <PageShell
+      title="Text Analysis"
+      subtitle="Paste any text — speech, tweet, manifesto — or upload a CSV. Multilingual sentiment, key phrases, and aggregate stats."
+      icon="📊"
+    >
+      {/* Mode tabs */}
+      <div className="inline-flex rounded-xl border border-border/60 bg-white p-1 shadow-soft">
+        {(["single", "batch", "csv"] as const).map((m) => (
           <button
+            key={m}
             type="button"
-            onClick={() => setMode("single")}
-            className={`rounded px-4 py-1.5 text-sm font-medium transition ${
-              mode === "single"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
+            onClick={() => setMode(m)}
+            className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all sm:px-5 sm:text-sm ${
+              mode === m
+                ? "btn-gradient shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             }`}
           >
-            Single text
+            {m === "single" ? "Single" : m === "batch" ? "Batch" : "CSV"}
           </button>
-          <button
-            type="button"
-            onClick={() => setMode("batch")}
-            className={`rounded px-4 py-1.5 text-sm font-medium transition ${
-              mode === "batch"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Batch paste
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("csv")}
-            className={`rounded px-4 py-1.5 text-sm font-medium transition ${
-              mode === "csv"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            CSV upload
-          </button>
-        </div>
+        ))}
+      </div>
 
-        {mode === "single" && <SingleMode />}
-        {mode === "batch" && (
-          <BatchMode countryId={country?.id ?? null} source="paste" />
-        )}
-        {mode === "csv" && (
-          <CsvMode countryId={country?.id ?? null} />
-        )}
-      </section>
-    </main>
+      {mode === "single" && <SingleMode />}
+      {mode === "batch" && (
+        <BatchMode countryId={country?.id ?? null} source="paste" />
+      )}
+      {mode === "csv" && <CsvMode countryId={country?.id ?? null} />}
+    </PageShell>
   );
 }
 
@@ -144,18 +105,24 @@ function SingleMode() {
 
   return (
     <>
-      <form onSubmit={handleAnalyze} className="mt-8 space-y-4">
+      <form onSubmit={handleAnalyze} className="mt-6 space-y-4">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Paste text here…"
           rows={10}
-          className="w-full rounded-md border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="input-refined !p-4 font-mono text-sm"
           required
         />
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={loading || !text.trim()}>
-            {loading ? "Analysing…" : "Analyse"}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Spinner className="h-4 w-4" /> Analysing…
+              </span>
+            ) : (
+              "Analyse"
+            )}
           </Button>
           <Button
             type="button"
@@ -183,55 +150,43 @@ function SingleMode() {
 function SingleResults({ result }: { result: AnalyzeResponse }) {
   const labelColour =
     result.label === "positive"
-      ? "bg-green-100 text-green-800"
+      ? "bg-emerald-100 text-emerald-800 border-emerald-200"
       : result.label === "negative"
-      ? "bg-red-100 text-red-800"
-      : "bg-gray-100 text-gray-800";
+      ? "bg-red-100 text-red-800 border-red-200"
+      : "bg-slate-100 text-slate-700 border-slate-200";
 
   return (
-    <div className="mt-8 space-y-6">
+    <div className="mt-8 space-y-5">
       {result.language && <LanguageChip language={result.language} />}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Sentiment">
           <span
-            className={`inline-block rounded-full px-3 py-1 text-sm font-semibold capitalize ${labelColour}`}
+            className={`stat-badge border capitalize ${labelColour}`}
           >
             {result.label}
           </span>
         </StatCard>
         <StatCard label="Confidence">
-          <span className="text-2xl font-bold">
+          <span className="text-2xl font-bold text-foreground">
             {(result.confidence * 100).toFixed(1)}%
           </span>
         </StatCard>
         <StatCard label="Compound score">
-          <span className="text-2xl font-bold">
+          <span className="text-2xl font-bold text-foreground">
             {result.scores.compound.toFixed(3)}
           </span>
           <span className="ml-2 text-xs text-muted-foreground">(−1 to +1)</span>
         </StatCard>
       </div>
 
-      <div className="rounded-lg border border-border bg-background p-6">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="rounded-xl border border-border/60 bg-white p-6 shadow-soft">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Score breakdown
         </h3>
         <div className="mt-4 space-y-3">
-          <ScoreBar
-            label="Positive"
-            value={result.scores.positive}
-            colour="bg-green-500"
-          />
-          <ScoreBar
-            label="Neutral"
-            value={result.scores.neutral}
-            colour="bg-gray-400"
-          />
-          <ScoreBar
-            label="Negative"
-            value={result.scores.negative}
-            colour="bg-red-500"
-          />
+          <ScoreBar label="Positive" value={result.scores.positive} colour="bg-emerald-500" />
+          <ScoreBar label="Neutral" value={result.scores.neutral} colour="bg-slate-400" />
+          <ScoreBar label="Negative" value={result.scores.negative} colour="bg-red-500" />
         </div>
       </div>
 
@@ -240,8 +195,7 @@ function SingleResults({ result }: { result: AnalyzeResponse }) {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Model: <code>{result.model}</code> · {result.word_count} words ·{" "}
-        {result.character_count} characters
+        Model: <code className="rounded bg-muted px-1.5 py-0.5 text-[11px]">{result.model}</code> · {result.word_count} words · {result.character_count} characters
       </p>
     </div>
   );
@@ -285,18 +239,24 @@ function BatchMode({
 
   return (
     <>
-      <form onSubmit={handleAnalyze} className="mt-8 space-y-4">
+      <form onSubmit={handleAnalyze} className="mt-6 space-y-4">
         <textarea
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           placeholder="Paste one text per line — up to 500 rows…"
           rows={12}
-          className="w-full rounded-md border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="input-refined !p-4 font-mono text-sm"
           required
         />
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={loading || lines.length === 0}>
-            {loading ? `Analysing ${lines.length}…` : `Analyse ${lines.length || ""} rows`}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Spinner className="h-4 w-4" /> Analysing {lines.length}…
+              </span>
+            ) : (
+              `Analyse ${lines.length || ""} rows`
+            )}
           </Button>
           <Button
             type="button"
@@ -336,7 +296,10 @@ function CsvMode({ countryId }: { countryId: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function runAnalysis(ts: string[], meta: { filename: string; column: string }) {
+  async function runAnalysis(
+    ts: string[],
+    meta: { filename: string; column: string }
+  ) {
     setError(null);
     setResult(null);
     setTexts(ts);
@@ -356,7 +319,8 @@ function CsvMode({ countryId }: { countryId: string | null }) {
     <>
       <CsvUpload onColumnSelected={runAnalysis} />
       {loading && (
-        <p className="mt-6 text-sm text-muted-foreground">
+        <p className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+          <Spinner className="h-4 w-4" />
           Analysing {texts?.length ?? 0} rows with XLM-RoBERTa…
         </p>
       )}
@@ -367,7 +331,10 @@ function CsvMode({ countryId }: { countryId: string | null }) {
           originalLines={texts}
           countryId={countryId}
           source="csv"
-          defaultName={filename.replace(/\.csv$/i, "") || `CSV ${new Date().toLocaleString()}`}
+          defaultName={
+            filename.replace(/\.csv$/i, "") ||
+            `CSV ${new Date().toLocaleString()}`
+          }
         />
       )}
     </>
@@ -404,7 +371,6 @@ function BatchResults({
     }
     const name = window.prompt("Name this analysis:", defaultName)?.trim();
     if (!name) return;
-
     setSaving(true);
     try {
       const saved = await saveAnalysis({
@@ -443,7 +409,11 @@ function BatchResults({
     };
     const csv = [
       headers.join(","),
-      ...rows.map((r) => headers.map((h) => esc((r as Record<string, unknown>)[h])).join(",")),
+      ...rows.map((r) =>
+        headers
+          .map((h) => esc((r as Record<string, unknown>)[h]))
+          .join(",")
+      ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -457,8 +427,9 @@ function BatchResults({
   }
 
   return (
-    <div className="mt-8 space-y-6">
-      <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/30 px-4 py-3">
+    <div className="mt-8 space-y-5">
+      {/* Actions bar */}
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-white px-5 py-4 shadow-soft">
         <Button type="button" onClick={handleSave} disabled={saving}>
           {saving ? "Saving…" : "Save analysis"}
         </Button>
@@ -466,13 +437,16 @@ function BatchResults({
           Export CSV
         </Button>
         {saveMessage && (
-          <span className="text-sm text-green-700">{saveMessage}</span>
+          <span className="text-sm font-medium text-emerald-700">
+            {saveMessage}
+          </span>
         )}
         {saveError && (
-          <span className="text-sm text-red-600">{saveError}</span>
+          <span className="text-sm text-danger">{saveError}</span>
         )}
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard label="Texts analysed">
           <span className="text-2xl font-bold">{aggregate.total}</span>
@@ -481,7 +455,7 @@ function BatchResults({
           <span className="text-2xl font-bold">
             {aggregate.mean_compound.toFixed(3)}
           </span>
-          <span className="ml-2 text-xs text-muted-foreground">(−1..+1)</span>
+          <span className="ml-1 text-xs text-muted-foreground">(−1..+1)</span>
         </StatCard>
         <StatCard label="Dominant label">
           <span className="text-lg font-bold capitalize">
@@ -497,21 +471,22 @@ function BatchResults({
         </StatCard>
       </div>
 
-      <div className="rounded-lg border border-border bg-background p-6">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      {/* Label distribution */}
+      <div className="rounded-xl border border-border/60 bg-white p-6 shadow-soft">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Label distribution
         </h3>
         <div className="mt-4 space-y-3">
           <ScoreBar
             label="Positive"
             value={aggregate.label_share.positive ?? 0}
-            colour="bg-green-500"
+            colour="bg-emerald-500"
             suffix={`${aggregate.label_counts.positive ?? 0} rows`}
           />
           <ScoreBar
             label="Neutral"
             value={aggregate.label_share.neutral ?? 0}
-            colour="bg-gray-400"
+            colour="bg-slate-400"
             suffix={`${aggregate.label_counts.neutral ?? 0} rows`}
           />
           <ScoreBar
@@ -523,9 +498,10 @@ function BatchResults({
         </div>
       </div>
 
+      {/* Language mix */}
       {Object.keys(aggregate.language_counts).length > 0 && (
-        <div className="rounded-lg border border-border bg-background p-6">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <div className="rounded-xl border border-border/60 bg-white p-6 shadow-soft">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Language mix
           </h3>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -534,7 +510,7 @@ function BatchResults({
               .map(([code, count]) => (
                 <span
                   key={code}
-                  className="rounded-full border border-border bg-muted px-3 py-1 text-sm"
+                  className="rounded-full border border-border/50 bg-muted/60 px-3 py-1 text-sm"
                 >
                   <span className="mr-1">{LANG_FLAGS[code] ?? "🌐"}</span>
                   <code className="text-xs">{code}</code> · {count}
@@ -551,23 +527,27 @@ function BatchResults({
         />
       )}
 
-      <div className="rounded-lg border border-border bg-background">
-        <div className="border-b border-border px-6 py-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      {/* Per-text results */}
+      <div className="overflow-hidden rounded-xl border border-border/60 bg-white shadow-soft">
+        <div className="border-b border-border/40 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Per-text results ({result.results.length})
           </h3>
         </div>
-        <ul className="divide-y divide-border">
+        <ul className="divide-y divide-border/40">
           {result.results.map((r, i) => (
-            <li key={i} className="px-6 py-4 text-sm">
+            <li
+              key={i}
+              className="px-6 py-4 text-sm transition-colors hover:bg-primary/[0.02]"
+            >
               <div className="flex items-center gap-3">
                 <span
-                  className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${
+                  className={`stat-badge capitalize ${
                     r.label === "positive"
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-emerald-100 text-emerald-800"
                       : r.label === "negative"
                       ? "bg-red-100 text-red-800"
-                      : "bg-gray-100 text-gray-800"
+                      : "bg-slate-100 text-slate-700"
                   }`}
                 >
                   {r.label}
@@ -582,7 +562,7 @@ function BatchResults({
                   </span>
                 )}
               </div>
-              <p className="mt-1 line-clamp-2 text-foreground">
+              <p className="mt-1.5 line-clamp-2 leading-relaxed text-foreground">
                 {originalLines[i] ?? ""}
               </p>
             </li>
@@ -591,7 +571,11 @@ function BatchResults({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Model: <code>{result.model}</code> · {aggregate.total} texts
+        Model:{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-[11px]">
+          {result.model}
+        </code>{" "}
+        · {aggregate.total} texts
       </p>
     </div>
   );
@@ -608,11 +592,12 @@ function LanguageChip({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
-      <span className="rounded-full border border-border bg-muted px-3 py-1">
+      <span className="rounded-full border border-border/50 bg-white px-3 py-1.5 shadow-soft">
         <span className="mr-1">{LANG_FLAGS[language.code] ?? "🌐"}</span>
         Detected: <strong>{language.name}</strong>{" "}
         <span className="text-muted-foreground">
-          ({language.code}) · {(language.confidence * 100).toFixed(0)}% confidence
+          ({language.code}) · {(language.confidence * 100).toFixed(0)}%
+          confidence
         </span>
       </span>
     </div>
@@ -627,16 +612,16 @@ function KeyPhrasesCard({
   title: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-background p-6">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="rounded-xl border border-border/60 bg-white p-6 shadow-soft">
+      <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
         {title}
       </h3>
       <div className="mt-4 flex flex-wrap gap-2">
         {phrases.map((kp) => (
           <span
             key={kp.phrase}
-            className="rounded-md border border-border bg-muted px-3 py-1 text-sm"
-            style={{ opacity: 0.4 + kp.weight * 0.6 }}
+            className="rounded-lg border border-primary/10 bg-primary/5 px-3 py-1 text-sm font-medium text-primary"
+            style={{ opacity: 0.5 + kp.weight * 0.5 }}
           >
             {kp.phrase}
           </span>
@@ -648,12 +633,15 @@ function KeyPhrasesCard({
 
 function ErrorCard({ error }: { error: string }) {
   return (
-    <div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-      <p className="font-medium">Analysis failed</p>
+    <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+      <p className="font-semibold">Analysis failed</p>
       <p className="mt-1">{error}</p>
-      <p className="mt-2 text-xs text-red-600">
+      <p className="mt-2 text-xs text-red-500">
         Make sure the FastAPI backend is running at{" "}
-        <code>http://localhost:8000</code>.
+        <code className="rounded bg-red-100 px-1 py-0.5">
+          http://localhost:8000
+        </code>
+        .
       </p>
     </div>
   );
@@ -667,8 +655,8 @@ function StatCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-background p-6">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="rounded-xl border border-border/60 bg-white p-5 shadow-soft">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
       <div className="mt-2">{children}</div>
@@ -691,13 +679,16 @@ function ScoreBar({
   return (
     <div>
       <div className="flex justify-between text-sm">
-        <span>{label}</span>
+        <span className="font-medium">{label}</span>
         <span className="text-muted-foreground">
           {pct}%{suffix ? ` · ${suffix}` : ""}
         </span>
       </div>
-      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div className={`h-full ${colour}`} style={{ width: `${pct}%` }} />
+      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted/60">
+        <div
+          className={`h-full rounded-full ${colour} transition-all duration-500`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );

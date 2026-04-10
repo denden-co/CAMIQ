@@ -4,26 +4,217 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --primary: 221 83% 53%;
+    /* ── Core palette ─────────────────────────────── */
+    --background: 220 20% 97%;
+    --foreground: 224 40% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 40% 10%;
+
+    /* Indigo-violet primary — authority + intelligence */
+    --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --border: 214 32% 91%;
+    --primary-hover: 239 84% 60%;
+
+    /* Accent — electric cyan for data highlights */
+    --accent: 192 91% 36%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Surfaces */
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 9% 46%;
+    --border: 220 13% 87%;
+    --ring: 239 84% 67%;
+
+    /* Semantic */
+    --success: 152 69% 31%;
+    --warning: 38 92% 50%;
+    --danger: 0 72% 51%;
+
+    /* Gradients */
+    --gradient-start: 239 84% 67%;
+    --gradient-end: 270 76% 60%;
+    --gradient-accent: 192 91% 36%;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --border: 217 33% 17%;
+    --background: 224 40% 6%;
+    --foreground: 220 14% 96%;
+    --card: 224 33% 9%;
+    --card-foreground: 220 14% 96%;
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 239 84% 74%;
+    --accent: 192 91% 50%;
+    --accent-foreground: 224 40% 6%;
+    --muted: 224 33% 14%;
+    --muted-foreground: 220 9% 55%;
+    --border: 224 25% 18%;
+    --ring: 239 84% 67%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01";
   }
+}
+
+@layer components {
+  /* ── Glass card ─────────────────────────────────── */
+  .card-glass {
+    @apply rounded-xl border border-white/60 bg-white/80 shadow-sm backdrop-blur-sm;
+  }
+
+  /* ── Gradient border wrapper ────────────────────── */
+  .gradient-border {
+    position: relative;
+    border-radius: 0.75rem;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gradient-start)),
+      hsl(var(--gradient-end)),
+      hsl(var(--gradient-accent))
+    );
+  }
+  .gradient-border > * {
+    border-radius: calc(0.75rem - 1px);
+  }
+
+  /* ── Gradient text ──────────────────────────────── */
+  .text-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gradient-start)),
+      hsl(var(--gradient-end))
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Subtle card hover lift ─────────────────────── */
+  .card-hover {
+    @apply transition-all duration-200 ease-out;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.12);
+  }
+
+  /* ── Premium button gradient ────────────────────── */
+  .btn-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gradient-start)),
+      hsl(var(--gradient-end))
+    );
+    @apply text-white font-medium shadow-md;
+    transition: all 0.2s ease;
+  }
+  .btn-gradient:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+  }
+  .btn-gradient:disabled {
+    opacity: 0.5;
+    filter: none;
+    box-shadow: none;
+  }
+
+  /* ── Form input refinement ──────────────────────── */
+  .input-refined {
+    @apply w-full rounded-lg border border-border bg-white px-3.5 py-2.5 text-sm shadow-sm transition-all;
+  }
+  .input-refined:focus {
+    @apply outline-none ring-2 ring-primary/30 border-primary/50;
+  }
+
+  /* ── Section divider with gradient ──────────────── */
+  .divider-gradient {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--border)),
+      hsl(var(--gradient-start) / 0.3),
+      hsl(var(--border)),
+      transparent
+    );
+  }
+
+  /* ── Stat badge ─────────────────────────────────── */
+  .stat-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  /* ── Animated background mesh for hero ──────────── */
+  .hero-mesh {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 50%, rgba(99, 102, 241, 0.15), transparent),
+      radial-gradient(ellipse 60% 80% at 80% 20%, rgba(139, 92, 246, 0.12), transparent),
+      radial-gradient(ellipse 50% 50% at 60% 80%, rgba(6, 182, 212, 0.10), transparent),
+      hsl(var(--background));
+  }
+
+  /* ── Navigation bar ─────────────────────────────── */
+  .nav-bar {
+    @apply border-b border-border/60 bg-white/70 backdrop-blur-md;
+  }
+
+  /* ── Table premium ──────────────────────────────── */
+  .table-premium thead {
+    background: linear-gradient(
+      135deg,
+      hsl(220 20% 95%),
+      hsl(220 20% 93%)
+    );
+  }
+  .table-premium th {
+    @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground;
+  }
+  .table-premium td {
+    @apply px-4 py-3 text-sm;
+  }
+  .table-premium tbody tr {
+    @apply border-t border-border/50 transition-colors;
+  }
+  .table-premium tbody tr:hover {
+    @apply bg-primary/[0.03];
+  }
+}
+
+/* ── Animations ───────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.25); }
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
 }
