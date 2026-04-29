@@ -1,5 +1,6 @@
 "use client";
 
+import { RefreshCw } from "lucide-react";
 import { useCountry } from "@/lib/country-context";
 
 const FLAGS: Record<string, string> = {
@@ -18,7 +19,8 @@ function flagFor(code: string): string {
 }
 
 export function CountryPicker() {
-  const { countries, selectedId, setSelectedId, loading, error } = useCountry();
+  const { countries, selectedId, setSelectedId, loading, error, refetch } =
+    useCountry();
 
   if (loading) {
     return (
@@ -28,9 +30,15 @@ export function CountryPicker() {
 
   if (error) {
     return (
-      <div className="text-xs text-red-600" title={error}>
-        Country service unavailable
-      </div>
+      <button
+        type="button"
+        onClick={refetch}
+        title={error}
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 transition-colors hover:text-red-700"
+      >
+        <RefreshCw className="h-3 w-3" strokeWidth={2} />
+        Country service unavailable — retry
+      </button>
     );
   }
 
