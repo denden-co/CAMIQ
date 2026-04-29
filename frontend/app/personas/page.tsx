@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -77,7 +78,7 @@ export default function PersonasPage() {
     <PageShell
       title="Voter Personas"
       subtitle="Generate realistic voter personas grounded in your sentiment analysis data. Powered by LLM."
-      icon="👥"
+      Icon={Users}
     >
       {/* Provider status */}
       <div className="text-sm">

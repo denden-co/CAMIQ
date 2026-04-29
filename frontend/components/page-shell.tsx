@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowLeft, type LucideIcon } from "lucide-react";
 
 interface PageShellProps {
   title: string;
   subtitle?: string;
-  /** Optional short mark (e.g. "◆") rendered in a bordered square before the title */
-  icon?: string;
+  /** Optional lucide icon component rendered in a bordered square before the title. */
+  Icon?: LucideIcon;
   children: React.ReactNode;
   headerExtra?: React.ReactNode;
 }
@@ -18,7 +19,7 @@ interface PageShellProps {
 export function PageShell({
   title,
   subtitle,
-  icon,
+  Icon,
   children,
   headerExtra,
 }: PageShellProps) {
@@ -37,9 +38,10 @@ export function PageShell({
             {headerExtra}
             <Link
               href="/dashboard"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              ← Dashboard
+              <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+              Dashboard
             </Link>
           </div>
         </div>
@@ -48,9 +50,9 @@ export function PageShell({
       {/* ── Page header ─────────────────────────────── */}
       <section className="border-b border-border bg-background">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-8 sm:px-8 sm:py-10">
-          {icon && (
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-sm">
-              {icon}
+          {Icon && (
+            <div className="flex h-10 w-10 items-center justify-center rounded-md border border-border bg-card">
+              <Icon className="h-5 w-5 text-foreground" strokeWidth={1.75} />
             </div>
           )}
           <div>

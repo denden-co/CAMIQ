@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  AlertOctagon,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  type LucideIcon,
+  Scale,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -15,35 +23,35 @@ import { Spinner } from "@/components/spinner";
 
 const VERDICT_STYLES: Record<
   string,
-  { bg: string; border: string; text: string; label: string; icon: string }
+  { bg: string; border: string; text: string; label: string; Icon: LucideIcon }
 > = {
   green: {
     bg: "bg-emerald-50",
     border: "border-emerald-200",
     text: "text-emerald-800",
     label: "Green — No issues detected",
-    icon: "✅",
+    Icon: CheckCircle2,
   },
   yellow: {
     bg: "bg-amber-50",
     border: "border-amber-200",
     text: "text-amber-800",
     label: "Yellow — Review recommended",
-    icon: "⚠️",
+    Icon: AlertTriangle,
   },
   red: {
     bg: "bg-red-50",
     border: "border-red-200",
     text: "text-red-800",
     label: "Red — Significant disparities",
-    icon: "🚨",
+    Icon: AlertOctagon,
   },
 };
 
-const SEVERITY_ICON: Record<string, string> = {
-  info: "ℹ️",
-  warning: "⚠️",
-  alert: "🚨",
+const SEVERITY_ICON: Record<string, LucideIcon> = {
+  info: Info,
+  warning: AlertTriangle,
+  alert: AlertOctagon,
 };
 
 function pct(v: number): string {
@@ -87,7 +95,7 @@ export default function BiasAuditPage() {
     <PageShell
       title="Bias & Fairness Audit"
       subtitle="Detect confidence disparities and label-language dependence. Uses 4/5ths rule + chi-square independence test."
-      icon="⚖️"
+      Icon={Scale}
     >
       {/* Controls */}
       <div className="flex flex-wrap items-end gap-4">
@@ -149,15 +157,19 @@ export default function BiasAuditPage() {
 
 function AuditResults({ audit }: { audit: BiasAuditResponse }) {
   const v = VERDICT_STYLES[audit.verdict] ?? VERDICT_STYLES.green;
+  const VerdictIcon = v.Icon;
 
   return (
     <div className="mt-8 space-y-5">
       {/* Verdict banner */}
       <div
-        className={`rounded-xl ${v.bg} ${v.border} border p-5`}
+        className={`rounded-lg ${v.bg} ${v.border} border p-5`}
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{v.icon}</span>
+          <VerdictIcon
+            className={`h-6 w-6 ${v.text}`}
+            strokeWidth={1.75}
+          />
           <div>
             <h2 className={`text-lg font-bold ${v.text}`}>{v.label}</h2>
             <p className={`text-sm ${v.text} opacity-80`}>
@@ -173,23 +185,29 @@ function AuditResults({ audit }: { audit: BiasAuditResponse }) {
         <div>
           <h3 className="text-sm font-bold text-foreground">Fairness Flags</h3>
           <div className="mt-2 space-y-2">
-            {audit.flags.map((f: FairnessFlag, i: number) => (
-              <div
-                key={i}
-                className={`rounded-xl border p-4 text-sm ${
-                  f.severity === "alert"
-                    ? "border-red-200 bg-red-50 text-red-800"
-                    : f.severity === "warning"
-                    ? "border-amber-200 bg-amber-50 text-amber-800"
-                    : "border-blue-200 bg-blue-50 text-blue-800"
-                }`}
-              >
-                <span className="mr-2">
-                  {SEVERITY_ICON[f.severity] ?? "ℹ️"}
-                </span>
-                <strong>{f.code}</strong> — {f.message}
-              </div>
-            ))}
+            {audit.flags.map((f: FairnessFlag, i: number) => {
+              const SeverityIcon = SEVERITY_ICON[f.severity] ?? Info;
+              return (
+                <div
+                  key={i}
+                  className={`flex items-start gap-2 rounded-lg border p-4 text-sm ${
+                    f.severity === "alert"
+                      ? "border-red-200 bg-red-50 text-red-800"
+                      : f.severity === "warning"
+                      ? "border-amber-200 bg-amber-50 text-amber-800"
+                      : "border-blue-200 bg-blue-50 text-blue-800"
+                  }`}
+                >
+                  <SeverityIcon
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                    strokeWidth={1.75}
+                  />
+                  <span>
+                    <strong>{f.code}</strong> — {f.message}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

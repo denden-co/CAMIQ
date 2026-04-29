@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CsvUpload } from "@/components/csv-upload";
 import { useCountry } from "@/lib/country-context";
@@ -49,7 +50,7 @@ export default function AnalyzePage() {
     <PageShell
       title="Text Analysis"
       subtitle="Paste any text — speech, tweet, manifesto — or upload a CSV. Multilingual sentiment, key phrases, and aggregate stats."
-      icon="📊"
+      Icon={BarChart3}
     >
       {/* Mode tabs */}
       <div className="inline-flex rounded-xl border border-border/60 bg-white p-1 shadow-soft">

@@ -1,6 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  BarChart3,
+  ListChecks,
+  type LucideIcon,
+  MessageSquare,
+  Shield,
+  Smartphone,
+  Sparkles,
+  Target,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -19,12 +29,12 @@ const PRIORITY_COLORS: Record<string, string> = {
   Low: "bg-emerald-100 text-emerald-800 border-emerald-200",
 };
 
-const CATEGORY_ICONS: Record<string, string> = {
-  Messaging: "💬",
-  Targeting: "🎯",
-  "Risk Mitigation": "🛡️",
-  "Resource Allocation": "📊",
-  "Digital Strategy": "📱",
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Messaging: MessageSquare,
+  Targeting: Target,
+  "Risk Mitigation": Shield,
+  "Resource Allocation": BarChart3,
+  "Digital Strategy": Smartphone,
 };
 
 export default function StrategyPage() {
@@ -83,7 +93,7 @@ export default function StrategyPage() {
     <PageShell
       title="AI Strategic Advisor"
       subtitle="Generate data-grounded campaign strategy recommendations from your sentiment analysis."
-      icon="🧠"
+      Icon={Sparkles}
     >
       {/* Provider status */}
       <div className="text-sm">
@@ -282,14 +292,14 @@ export default function StrategyPage() {
 function RecommendationCard({ rec }: { rec: StrategyRecommendation }) {
   const priorityStyle =
     PRIORITY_COLORS[rec.priority] ?? PRIORITY_COLORS.Medium;
-  const icon = CATEGORY_ICONS[rec.category] ?? "📋";
+  const Icon = CATEGORY_ICONS[rec.category] ?? ListChecks;
 
   return (
-    <div className="rounded-xl border border-border/60 bg-white p-6 shadow-soft transition-all hover:shadow-card">
+    <div className="rounded-lg border border-border bg-card p-6 transition-colors hover:border-foreground/30">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-xl">
-            {icon}
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border bg-card">
+            <Icon className="h-5 w-5 text-foreground" strokeWidth={1.75} />
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">

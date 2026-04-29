@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Globe2 } from "lucide-react";
 import { useCountry } from "@/lib/country-context";
 import {
   getCountry,
@@ -42,7 +43,7 @@ export default function CountriesPage() {
     <PageShell
       title="Country Configuration"
       subtitle="Parties, electoral system, and language settings. Drop a JSON file into api/configs/countries/ to add more."
-      icon="🌍"
+      Icon={Globe2}
       headerExtra={<CountryPicker />}
     >
       {loading && (
