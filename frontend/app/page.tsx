@@ -1,36 +1,47 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import {
+  Activity,
+  Globe2,
+  Hexagon,
+  type LucideIcon,
+  Scale,
+  Sparkles,
+  Users,
+} from "lucide-react";
 
-// Six modules — displayed as a tight grid with geometric monogram icons (no emoji)
-const FEATURES = [
+// Six modules — displayed as a tight grid with lucide icons.
+type Feature = { Icon: LucideIcon; title: string; desc: string };
+
+const FEATURES: Feature[] = [
   {
-    mark: "◆",
+    Icon: Activity,
     title: "Sentiment analysis",
     desc: "Multi-model ensemble with XLM-RoBERTa for 100+ languages. Confidence scores, not just labels.",
   },
   {
-    mark: "◇",
+    Icon: Users,
     title: "Voter personas",
     desc: "Narrative personas generated from real conversation data, not invented demographics.",
   },
   {
-    mark: "△",
+    Icon: Sparkles,
     title: "AI strategy",
     desc: "Recommendations grounded in your data, with source-linked reasoning.",
   },
   {
-    mark: "▢",
+    Icon: Scale,
     title: "Bias & fairness audit",
     desc: "Gini, chi-square, 4/5ths rule. Know where your model is blind before you ship a strategy.",
   },
   {
-    mark: "○",
+    Icon: Globe2,
     title: "Global coverage",
     desc: "FPTP, PR, MMP, two-round. UK, US, India, France, Germany, Brazil, Nigeria — and custom profiles.",
   },
   {
-    mark: "⬡",
+    Icon: Hexagon,
     title: "Topic modelling",
     desc: "BERTopic, LDA, NMF — discover what voters actually talk about, not what polls ask.",
   },
@@ -136,7 +147,7 @@ export default async function HomePage() {
           </div>
 
           {/* Product preview card */}
-          <div className="mt-16 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <div className="mt-16 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
             <div className="flex items-center gap-2 border-b border-border px-5 py-3">
               <span className="h-3 w-3 rounded-full bg-muted" />
               <span className="h-3 w-3 rounded-full bg-muted" />
@@ -231,14 +242,14 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
+          <div className="mt-14 grid gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-3">
             {FEATURES.map((f) => (
               <div
                 key={f.title}
                 className="card-hover bg-card p-8"
               >
-                <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-md border border-border text-sm">
-                  {f.mark}
+                <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card">
+                  <f.Icon className="h-4 w-4 text-foreground" strokeWidth={1.75} />
                 </div>
                 <h3 className="font-semibold">{f.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

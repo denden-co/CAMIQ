@@ -84,12 +84,10 @@
     font-feature-settings: "ss01", "cv11";
   }
 
-  /* Tighter tracking on headlines and display type */
+  /* Letter-spacing per Frontend Prompt Instructions: 0, not negative.
+     Inter is already optically tight enough at headline sizes. */
   h1, h2, h3, .font-display {
-    letter-spacing: -0.025em;
-  }
-  h1, .font-display {
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
   }
 }
 
