@@ -15,7 +15,9 @@ frontend/tsconfig.tsbuildinfo
 # Local scratch
 preview.html
 phase2-preview.html
+UI_REFRESH_PREVIEW.html
 api/data/
+api/*.log
 
 # Saved analyses (file-backed persistence stub, per-user JSON)
 api/data/analyses/

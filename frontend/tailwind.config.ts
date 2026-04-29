@@ -22,6 +22,7 @@ const config: Config = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          soft: "hsl(var(--accent-soft))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -43,17 +44,22 @@ const config: Config = {
           "sans-serif",
         ],
       },
+      letterSpacing: {
+        display: "-0.03em",
+        tight: "-0.02em",
+      },
       borderRadius: {
+        lg: "0.5rem",
         xl: "0.75rem",
         "2xl": "1rem",
       },
       boxShadow: {
-        glow: "0 0 20px rgba(99, 102, 241, 0.15)",
-        "glow-lg": "0 0 40px rgba(99, 102, 241, 0.2)",
-        soft: "0 2px 8px rgba(0, 0, 0, 0.06)",
-        card: "0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06)",
-        "card-hover":
-          "0 8px 30px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06)",
+        // Clean minimal shadow scale — very subtle, ink-based rather than colour tints
+        glow: "0 0 0 3px rgba(10, 10, 10, 0.06)",
+        "glow-lg": "0 0 0 4px rgba(10, 10, 10, 0.08)",
+        soft: "0 1px 2px rgba(0, 0, 0, 0.04)",
+        card: "0 1px 2px rgba(0, 0, 0, 0.04)",
+        "card-hover": "0 2px 8px rgba(0, 0, 0, 0.06)",
       },
     },
   },

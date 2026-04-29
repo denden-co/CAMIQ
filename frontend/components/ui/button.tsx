@@ -2,23 +2,32 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/**
+ * Button — clean minimal variants.
+ *
+ * • default: solid ink (near-black). Strongest CTA.
+ * • accent:  indigo. Use for hero primary CTA where ink is too heavy.
+ * • outline: bordered white, subtle.
+ * • ghost:   transparent, hover tint.
+ * • secondary: muted surface.
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40",
   {
     variants: {
       variant: {
-        default:
-          "btn-gradient",
+        default: "btn-gradient",
+        accent: "btn-accent",
         outline:
-          "border border-border bg-white text-foreground shadow-sm hover:bg-muted/50 hover:border-primary/30",
-        ghost: "hover:bg-muted/60",
+          "border border-border bg-card text-foreground hover:border-foreground/30",
+        ghost: "text-foreground hover:bg-muted",
         secondary:
-          "bg-muted text-foreground shadow-sm hover:bg-muted/80",
+          "bg-muted text-foreground hover:bg-muted/70",
       },
       size: {
-        default: "h-10 px-5 py-2",
+        default: "h-10 px-4",
         sm: "h-9 px-3.5 text-xs",
-        lg: "h-12 px-8 text-base",
+        lg: "h-11 px-6",
       },
     },
     defaultVariants: {

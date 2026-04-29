@@ -46,7 +46,14 @@ cd api && pytest                     # tests
 
 Derived from doctoral thesis: "Analyzing Twitter/X Sentiment and Topic Signals for the 2024 UK General Election" by Everton Dennis at University of East London. The thesis ensemble model (weighted RoBERTa + BERTweet) achieved 80.3% accuracy/F1 for 3-class sentiment.
 
-## Build progress (as of 2026-04-10)
+## Local paths
+
+- **Mac path:** `~/Desktop/Cam/CAMIQ`
+- **Git remote:** `origin https://github.com/denden-co/CAMIQ.git` (HTTPS)
+- **Branch:** `main`
+- **Last pushed commit:** `2e5516a` (Phase 6 UI redesign, 23 files, pushed 2026-04-11) — security fix commit pending push (2026-04-29)
+
+## Build progress (as of 2026-04-29)
 
 ### Completed phases
 
@@ -80,9 +87,24 @@ Custom shadows in tailwind.config.ts: `glow`, `glow-lg`, `soft`, `card`, `card-h
 - All 6 modules live and tested
 - TypeScript compiles with zero errors
 
-### Pending
+### Pending (next phases)
 
-- Deployment: Vercel (frontend) + Railway/Render (API)
-- Supabase auth integration (replace dev mock)
-- Real-time data ingestion (Twitter/X API)
-- Additional ML models beyond XLM-RoBERTa
+- **Phase 7** — Deployment: Vercel (frontend) + Railway/Render (API)
+- **Phase 8** — Supabase auth integration (replace dev mock localStorage user)
+- **Phase 9** — Real-time data ingestion (Twitter/X API)
+- **Phase 10** — Additional ML models beyond XLM-RoBERTa
+
+### Security log
+
+- **2026-04-29** — Resolved 3 moderate npm advisories:
+  - `postcss` → `^8.5.12` (GHSA-qx2v-qp2m-jg93, XSS via unescaped `</style>`)
+  - `next-intl` → `^4.11.0` (GHSA-8f24-v5vv-gm5j, open redirect)
+  - `next` → `^16.2.4` (transitive postcss)
+  - Added `overrides.postcss = ^8.5.12` to force-resolve Next's bundled copy.
+  - Verified: `npm audit` reports 0 vulnerabilities; `tsc --noEmit` passes.
+  - Pre-existing: ESLint 8.57.1 ↔ eslint-config-next 16 peer-dep mismatch — install needs `--legacy-peer-deps`. Worth a future cleanup.
+
+### Session notes
+
+- GitHub repo: https://github.com/denden-co/CAMIQ
+- Session 2026-04-29: security patch + Phase 6 follow-on work (UI tweaks, new /about /blog /changelog /contact /legal /status pages, FRONTEND_IMPROVEMENT_PLAN.md, multi-lang-test.csv, start-dev-backend.command).

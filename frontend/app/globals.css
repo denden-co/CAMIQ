@@ -2,60 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ───────────────────────────────────────────────────────────
+   CAMIQ — Clean Minimal Design System (2026 refresh)
+
+   Philosophy:
+   • Monochrome foundation (ink + paper + canvas) with a single
+     indigo accent for emphasis.
+   • Subtle 1px borders instead of heavy shadows and glows.
+   • Typography does the heavy lifting, not decoration.
+   • Backward-compatible: existing class names (btn-gradient,
+     text-gradient, card-glass, hero-mesh, etc.) are retained
+     but now render the new clean look.
+   ─────────────────────────────────────────────────────────── */
+
 @layer base {
   :root {
-    /* ── Core palette ─────────────────────────────── */
-    --background: 220 20% 97%;
-    --foreground: 224 40% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 40% 10%;
+    /* ── Surfaces ──────────────────────────────────── */
+    --background: 20 6% 98%;           /* canvas #FAFAF9 — page */
+    --foreground: 0 0% 4%;             /* ink    #0A0A0A — text */
+    --card: 0 0% 100%;                 /* paper  #FFFFFF — cards */
+    --card-foreground: 0 0% 4%;
 
-    /* Indigo-violet primary — authority + intelligence */
-    --primary: 239 84% 67%;
+    /* ── Primary — ink (near-black) for CTAs and strong surfaces ── */
+    --primary: 0 0% 4%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 239 84% 60%;
+    --primary-hover: 0 0% 15%;
 
-    /* Accent — electric cyan for data highlights */
-    --accent: 192 91% 36%;
+    /* ── Accent — indigo for highlights and interactive colour ── */
+    --accent: 243 75% 58%;             /* #4F46E5 */
     --accent-foreground: 0 0% 100%;
+    --accent-soft: 243 100% 96%;       /* #EEF2FF */
 
-    /* Surfaces */
-    --muted: 220 14% 93%;
-    --muted-foreground: 220 9% 46%;
-    --border: 220 13% 87%;
-    --ring: 239 84% 67%;
+    /* ── Neutrals ──────────────────────────────────── */
+    --muted: 20 6% 94%;
+    --muted-foreground: 0 0% 45%;
+    --border: 24 6% 90%;               /* #E7E5E4 */
+    --border-strong: 0 0% 83%;
+    --ring: 0 0% 4%;
 
-    /* Semantic */
-    --success: 152 69% 31%;
-    --warning: 38 92% 50%;
+    /* ── Semantic colours ──────────────────────────── */
+    --success: 158 94% 30%;
+    --warning: 26 90% 37%;
     --danger: 0 72% 51%;
 
-    /* Gradients */
-    --gradient-start: 239 84% 67%;
-    --gradient-end: 270 76% 60%;
-    --gradient-accent: 192 91% 36%;
+    /* ── Gradient tokens (retained but neutralised) ── */
+    --gradient-start: 0 0% 4%;
+    --gradient-end: 0 0% 15%;
+    --gradient-accent: 243 75% 58%;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
-    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+    /* ── Shadows — ink-based, very subtle ──────────── */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 0 3px rgba(10, 10, 10, 0.06);
   }
 
   .dark {
-    --background: 224 40% 6%;
-    --foreground: 220 14% 96%;
-    --card: 224 33% 9%;
-    --card-foreground: 220 14% 96%;
-    --primary: 239 84% 67%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 239 84% 74%;
-    --accent: 192 91% 50%;
-    --accent-foreground: 224 40% 6%;
-    --muted: 224 33% 14%;
-    --muted-foreground: 220 9% 55%;
-    --border: 224 25% 18%;
-    --ring: 239 84% 67%;
+    --background: 0 0% 6%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 96%;
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 4%;
+    --primary-hover: 0 0% 88%;
+    --accent: 243 75% 68%;
+    --accent-foreground: 0 0% 4%;
+    --accent-soft: 243 50% 18%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 64%;
+    --border: 0 0% 16%;
+    --border-strong: 0 0% 24%;
+    --ring: 0 0% 96%;
   }
 
   * {
@@ -64,120 +81,121 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "ss01", "ss02", "cv01";
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  /* Tighter tracking on headlines and display type */
+  h1, h2, h3, .font-display {
+    letter-spacing: -0.025em;
+  }
+  h1, .font-display {
+    letter-spacing: -0.03em;
   }
 }
 
 @layer components {
-  /* ── Glass card ─────────────────────────────────── */
+  /* ── Card surface (was glass with backdrop-blur) ── */
   .card-glass {
-    @apply rounded-xl border border-white/60 bg-white/80 shadow-sm backdrop-blur-sm;
+    @apply rounded-xl border border-border bg-card shadow-sm;
   }
 
-  /* ── Gradient border wrapper ────────────────────── */
+  /* ── Border wrapper (was gradient border) ──────── */
   .gradient-border {
-    position: relative;
-    border-radius: 0.75rem;
-    padding: 1px;
-    background: linear-gradient(
-      135deg,
-      hsl(var(--gradient-start)),
-      hsl(var(--gradient-end)),
-      hsl(var(--gradient-accent))
-    );
+    @apply rounded-xl border border-border;
+    padding: 0;
   }
   .gradient-border > * {
     border-radius: calc(0.75rem - 1px);
   }
 
-  /* ── Gradient text ──────────────────────────────── */
+  /* ── Accented text (was linear-gradient, now solid indigo) ── */
   .text-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--gradient-start)),
-      hsl(var(--gradient-end))
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: hsl(var(--accent));
+    -webkit-text-fill-color: currentColor;
+    background: none;
   }
 
-  /* ── Subtle card hover lift ─────────────────────── */
+  /* ── Card hover — subtle border strengthen ─────── */
   .card-hover {
-    @apply transition-all duration-200 ease-out;
+    @apply transition-colors duration-150 ease-out;
   }
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.12);
+    border-color: hsl(var(--border-strong));
+    transform: none;
+    box-shadow: none;
   }
 
-  /* ── Premium button gradient ────────────────────── */
+  /* ── Primary button — solid ink (was gradient) ── */
   .btn-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--gradient-start)),
-      hsl(var(--gradient-end))
-    );
-    @apply text-white font-medium shadow-md;
-    transition: all 0.2s ease;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    @apply font-medium;
+    transition: background 0.15s ease;
+    box-shadow: none;
   }
   .btn-gradient:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+    background: hsl(var(--primary-hover));
+    filter: none;
+    box-shadow: none;
   }
   .btn-gradient:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     filter: none;
     box-shadow: none;
   }
 
+  /* ── Accent button (indigo) — for secondary hero CTA etc. ── */
+  .btn-accent {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+    @apply font-medium;
+    transition: background 0.15s ease;
+  }
+  .btn-accent:hover {
+    background: hsl(243 75% 52%);
+  }
+
   /* ── Form input refinement ──────────────────────── */
   .input-refined {
-    @apply w-full rounded-lg border border-border bg-white px-3.5 py-2.5 text-sm shadow-sm transition-all;
+    @apply w-full rounded-lg border border-border bg-card px-3.5 py-2.5 text-sm transition-colors;
   }
   .input-refined:focus {
-    @apply outline-none ring-2 ring-primary/30 border-primary/50;
+    @apply outline-none border-foreground;
+    box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.06);
   }
 
-  /* ── Section divider with gradient ──────────────── */
+  /* ── Section divider — straight line ───────────── */
   .divider-gradient {
     height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--border)),
-      hsl(var(--gradient-start) / 0.3),
-      hsl(var(--border)),
-      transparent
-    );
+    background: hsl(var(--border));
   }
 
-  /* ── Stat badge ─────────────────────────────────── */
+  /* ── Stat badge / chip ──────────────────────────── */
   .stat-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-0.5 text-xs font-medium text-muted-foreground;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground;
+  }
+  .chip-accent {
+    color: hsl(var(--accent));
+    background: hsl(var(--accent-soft));
+    border-color: transparent;
   }
 
-  /* ── Animated background mesh for hero ──────────── */
+  /* ── Hero — clean canvas (was animated mesh) ──── */
   .hero-mesh {
-    background:
-      radial-gradient(ellipse 80% 60% at 20% 50%, rgba(99, 102, 241, 0.15), transparent),
-      radial-gradient(ellipse 60% 80% at 80% 20%, rgba(139, 92, 246, 0.12), transparent),
-      radial-gradient(ellipse 50% 50% at 60% 80%, rgba(6, 182, 212, 0.10), transparent),
-      hsl(var(--background));
+    background: hsl(var(--background));
   }
 
   /* ── Navigation bar ─────────────────────────────── */
   .nav-bar {
-    @apply border-b border-border/60 bg-white/70 backdrop-blur-md;
+    @apply border-b border-border bg-card/80 backdrop-blur-md;
   }
 
-  /* ── Table premium ──────────────────────────────── */
+  /* ── Table — clean ──────────────────────────────── */
   .table-premium thead {
-    background: linear-gradient(
-      135deg,
-      hsl(220 20% 95%),
-      hsl(220 20% 93%)
-    );
+    background: hsl(var(--muted));
   }
   .table-premium th {
     @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground;
@@ -186,35 +204,43 @@
     @apply px-4 py-3 text-sm;
   }
   .table-premium tbody tr {
-    @apply border-t border-border/50 transition-colors;
+    @apply border-t border-border transition-colors;
   }
   .table-premium tbody tr:hover {
-    @apply bg-primary/[0.03];
+    background: hsl(var(--muted) / 0.5);
+  }
+
+  /* ── Logo mark ─────────────────────────────────── */
+  .logomark {
+    @apply inline-flex h-6 w-6 items-center justify-center rounded-md bg-foreground text-[13px] font-bold text-background;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── Page section header dot ───────────────────── */
+  .dot {
+    @apply inline-block h-1.5 w-1.5 rounded-full;
+    background: hsl(var(--accent));
   }
 }
 
-/* ── Animations ───────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────
+   Animations — minimal, subtle.
+   (Kept for backward compatibility with existing usage.)
+   ─────────────────────────────────────────────────────────── */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-4px); }
 }
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.15); }
-  50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.25); }
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient-shift 6s ease infinite;
-}
+.animate-float        { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow   { animation: pulse-soft 3s ease-in-out infinite; }
+.animate-fade-in      { animation: fade-in 0.25s ease-out; }
+.animate-gradient     { /* retained name, now no-op for backwards compat */ }
