@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 // Six modules — displayed as a tight grid with geometric monogram icons (no emoji)
 const FEATURES = [
@@ -34,7 +36,24 @@ const FEATURES = [
   },
 ];
 
-export default function HomePage() {
+/**
+ * Root route — `/`.
+ *
+ * If the user is already signed in (dev cookie present, or a Supabase session
+ * cookie exists once Phase 8 lands), send them straight to the dashboard. The
+ * marketing landing page below is only rendered for visitors who are not yet
+ * signed in.
+ *
+ * Rationale: Frontend Prompt Instructions (29 Apr 2026) — "build the actual
+ * usable experience as the first screen, not marketing or explanatory
+ * content." For an analyst tool, the dashboard IS the experience.
+ */
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  if (cookieStore.get("campaigniq_dev_auth")?.value) {
+    redirect("/dashboard");
+  }
+
   return (
     <main className="min-h-screen bg-background">
       {/* ──────────────────────────────── Nav ──────────────────────────────── */}
