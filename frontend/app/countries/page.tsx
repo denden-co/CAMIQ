@@ -15,24 +15,32 @@ import { Spinner } from "@/components/spinner";
 export default function CountriesPage() {
   const { selectedId } = useCountry();
   const [profile, setProfile] = useState<CountryProfile | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  /** Error tagged with the country it belongs to, so stale errors from a
+   *  previously selected country never show. */
+  const [fetchError, setFetchError] = useState<{
+    id: string;
+    message: string;
+  } | null>(null);
+
+  // Derived, not stored: loading while a country is selected and we have
+  // neither its profile nor an error for it yet.
+  const error = fetchError && fetchError.id === selectedId ? fetchError.message : null;
+  const loading = !!selectedId && profile?.id !== selectedId && !error;
 
   useEffect(() => {
     if (!selectedId) return;
     let cancelled = false;
-    setLoading(true);
-    setError(null);
     getCountry(selectedId)
       .then((p) => {
         if (!cancelled) setProfile(p);
       })
       .catch((e) => {
         if (!cancelled)
-          setError(e instanceof Error ? e.message : "Failed to load country");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+          setFetchError({
+            id: selectedId,
+            message:
+              e instanceof Error ? e.message : "Failed to load country",
+          });
       });
     return () => {
       cancelled = true;

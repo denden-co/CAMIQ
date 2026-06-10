@@ -77,11 +77,13 @@ export default function DashboardPage() {
   );
   const [analyses, setAnalyses] = useState<AnalysisSummary[] | null>(null);
   const [analysesError, setAnalysesError] = useState<string | null>(null);
-  const [analysesLoading, setAnalysesLoading] = useState(false);
+  // Derived, not stored: we are loading while signed in with no result yet.
+  const analysesLoading = !!user?.email && analyses === null && !analysesError;
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem("campaigniq_dev_user");
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot read of the dev-auth localStorage store after hydration; lazy useState would mismatch SSR markup
       if (raw) setUser(JSON.parse(raw));
     } catch {
       /* ignore */
@@ -91,8 +93,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user?.email) return;
     let cancelled = false;
-    setAnalysesLoading(true);
-    setAnalysesError(null);
     listAnalyses()
       .then((list) => {
         if (!cancelled) setAnalyses(list);
@@ -103,9 +103,6 @@ export default function DashboardPage() {
             err instanceof Error ? err.message : "Failed to load analyses."
           );
         }
-      })
-      .finally(() => {
-        if (!cancelled) setAnalysesLoading(false);
       });
     return () => {
       cancelled = true;

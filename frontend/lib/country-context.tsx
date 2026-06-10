@@ -35,10 +35,10 @@ export function CountryProvider({ children }: { children: ReactNode }) {
   /** Bumped by refetch() to trigger the loader effect. */
   const [reloadKey, setReloadKey] = useState(0);
 
+  // Loading/error state is set *outside* this effect (initial state and
+  // refetch()) so the effect body never calls setState synchronously.
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
     listCountries()
       .then((list) => {
         if (cancelled) return;
@@ -80,6 +80,8 @@ export function CountryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refetch = useCallback(() => {
+    setLoading(true);
+    setError(null);
     setReloadKey((k) => k + 1);
   }, []);
 
