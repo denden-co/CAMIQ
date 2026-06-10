@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CampaignIQ — Phase 2 Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .tab-btn.active { background:#0f172a; color:#fff; }
+  .tab-btn { transition: all .15s; }
+  .progress { height:8px; background:#e5e7eb; border-radius:9999px; overflow:hidden; }
+  .progress > div { height:100%; }
+  .chip { display:inline-flex; align-items:center; gap:.25rem; border:1px solid #e5e7eb; background:#f3f4f6; border-radius:9999px; padding:.25rem .75rem; font-size:.8rem; }
+  .label-badge { display:inline-block; border-radius:9999px; padding:.15rem .6rem; font-size:.7rem; font-weight:600; text-transform:capitalize; }
+  .label-pos { background:#dcfce7; color:#166534; }
+  .label-neu { background:#f3f4f6; color:#374151; }
+  .label-neg { background:#fee2e2; color:#991b1b; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<!-- Preview navigation -->
+<div class="bg-amber-50 border-b border-amber-200 text-amber-900 text-center text-sm py-2">
+  📸 Static preview — what the app <em>looks like</em> after Phase 2. Your real app runs at
+  <code class="bg-amber-100 px-1 rounded">localhost:3000</code>.
+  Jump to: <a class="underline font-medium" href="#dashboard">Dashboard</a> ·
+  <a class="underline font-medium" href="#catalogue">Elections catalogue</a> ·
+  <a class="underline font-medium" href="#analyze-csv">/analyze (CSV mode)</a> ·
+  <a class="underline font-medium" href="#analyze-results">Batch results + Save</a>
+</div>
+
+<!-- ================================================================ -->
+<!-- ELECTIONS CATALOGUE — forward-looking                            -->
+<!-- ================================================================ -->
+<section id="catalogue" class="max-w-6xl mx-auto px-6 pt-12">
+  <div class="flex items-baseline justify-between">
+    <div>
+      <h2 class="text-2xl font-bold">Elections catalogue</h2>
+      <p class="mt-1 text-sm text-slate-500">Forward-looking elections only. Historical 2024/2025 cycles have been retired from the picker.</p>
+    </div>
+    <span class="text-xs text-slate-500">7 elections loaded</span>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <div class="flex items-center gap-2 text-lg font-semibold">🇧🇷 Brazil</div>
+      <p class="mt-1 text-sm text-slate-600">2026 Brazilian Presidential Election</p>
+      <p class="mt-3 text-xs text-slate-500">Two-round · 4 Oct 2026</p>
+      <div class="mt-3 flex flex-wrap gap-1">
+        <span class="inline-block h-3 w-6 rounded" style="background:#CC0000" title="PT"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#003399" title="PL"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#0088CC" title="PSDB"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#FFCC00" title="MDB"></span>
+        <span class="text-xs text-slate-500 ml-1">+3 more</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <div class="flex items-center gap-2 text-lg font-semibold">🇫🇷 France</div>
+      <p class="mt-1 text-sm text-slate-600">2027 French Presidential Election</p>
+      <p class="mt-3 text-xs text-slate-500">Two-round · Apr 2027</p>
+      <div class="mt-3 flex flex-wrap gap-1">
+        <span class="inline-block h-3 w-6 rounded" style="background:#0D378A" title="RN"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#FFEB00" title="Renaissance"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#CC2443" title="LFI"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#086CA2" title="LR"></span>
+        <span class="text-xs text-slate-500 ml-1">+3 more</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <div class="flex items-center gap-2 text-lg font-semibold">🇩🇪 Germany</div>
+      <p class="mt-1 text-sm text-slate-600">German Federal Election (projected 2029)</p>
+      <p class="mt-3 text-xs text-slate-500">MMP · ~Feb 2029</p>
+      <div class="mt-3 flex flex-wrap gap-1">
+        <span class="inline-block h-3 w-6 rounded" style="background:#000000" title="CDU/CSU"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#E3000F" title="SPD"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#64A12D" title="Grüne"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#FFED00" title="FDP"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#009EE0" title="AfD"></span>
+        <span class="text-xs text-slate-500 ml-1">+2 more</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <div class="flex items-center gap-2 text-lg font-semibold">🇮🇳 India</div>
+      <p class="mt-1 text-sm text-slate-600">Indian General Election (projected 2029)</p>
+      <p class="mt-3 text-xs text-slate-500">FPTP · Apr–May 2029 · 11 languages</p>
+      <div class="mt-3 flex flex-wrap gap-1">
+        <span class="inline-block h-3 w-6 rounded" style="background:#FF9933" title="BJP"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#19AAED" title="INC"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#019934" title="AAP"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#20C646" title="AITC"></span>
+        <span class="text-xs text-slate-500 ml-1">+4 more</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-blue-200 bg-blue-50 p-5 ring-2 ring-blue-200">
+      <div class="flex items-center gap-2 text-lg font-semibold">🇬🇧 United Kingdom <span class="text-xs font-normal text-blue-700 bg-blue-100 rounded-full px-2 py-0.5">Selected</span></div>
+      <p class="mt-1 text-sm text-slate-600">UK General Election (projected 2029)</p>
+      <p class="mt-3 text-xs text-slate-500">FPTP · by Aug 2029 · 650 seats</p>
+      <div class="mt-3 flex flex-wrap gap-1">
+        <span class="inline-block h-3 w-6 rounded" style="background:#E4003B" title="Lab"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#0087DC" title="Con"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#12B6CF" title="Ref"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#FAA61A" title="LD"></span>
+        <span class="text-xs text-slate-500 ml-1">+3 more</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <div class="flex items-center gap-2 text-lg font-semibold">🇺🇸 United States</div>
+      <p class="mt-1 text-sm text-slate-600">2028 US Presidential Election</p>
+      <p class="mt-3 text-xs text-slate-500">Electoral College · 7 Nov 2028 · 538 EVs</p>
+      <div class="mt-3 flex flex-wrap gap-1">
+        <span class="inline-block h-3 w-6 rounded" style="background:#0015BC" title="Dem"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#FF0000" title="Rep"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#FED105" title="Lib"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#17AA5C" title="Grn"></span>
+        <span class="text-xs text-slate-500 ml-1">+1 more</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <div class="flex items-center gap-2 text-lg font-semibold">🇨🇦 Canada</div>
+      <p class="mt-1 text-sm text-slate-600">Canadian Federal Election (projected 2029)</p>
+      <p class="mt-3 text-xs text-slate-500">FPTP · by Oct 2029 · bilingual</p>
+      <div class="mt-3 flex flex-wrap gap-1">
+        <span class="inline-block h-3 w-6 rounded" style="background:#D71B1E" title="Lib"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#1A4782" title="CPC"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#F58220" title="NDP"></span>
+        <span class="inline-block h-3 w-6 rounded" style="background:#0088CE" title="BQ"></span>
+        <span class="text-xs text-slate-500 ml-1">+2 more</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- DASHBOARD                                                        -->
+<!-- ================================================================ -->
+<section id="dashboard" class="max-w-6xl mx-auto px-6 pt-12">
+  <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+    <h1 class="text-xl font-bold">CampaignIQ</h1>
+    <div class="flex items-center gap-4 text-sm">
+      <div class="border border-slate-200 rounded-md px-3 py-1 bg-white">🇬🇧 United Kingdom — GE (projected 2029) ▾</div>
+      <span class="text-slate-500">evertondennis1@gmail.com</span>
+      <button class="border border-slate-200 rounded-md px-3 py-1 bg-white">Sign out</button>
+    </div>
+  </div>
+
+  <div class="mt-10">
+    <h2 class="text-3xl font-bold">Welcome, Everton</h2>
+    <p class="mt-2 text-slate-500">
+      Your role: <span class="text-slate-900 font-medium">analyst</span> ·
+      Focus: <span class="text-blue-600 font-medium">United Kingdom — GE (projected 2029)</span>
+    </p>
+  </div>
+
+  <!-- RECENT ANALYSES -->
+  <div class="mt-12">
+    <div class="flex items-baseline justify-between mb-4">
+      <h3 class="text-lg font-semibold">Recent Analyses</h3>
+      <a href="#analyze-csv" class="text-sm text-blue-600 hover:underline">New analysis →</a>
+    </div>
+    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-xs font-semibold uppercase text-slate-500">
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">Source</th>
+            <th class="px-4 py-2">Rows</th>
+            <th class="px-4 py-2">Dominant</th>
+            <th class="px-4 py-2">Mean</th>
+            <th class="px-4 py-2">Languages</th>
+            <th class="px-4 py-2">Saved</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr>
+            <td class="px-4 py-2 font-medium">UK housing policy — Twitter sample</td>
+            <td class="px-4 py-2 text-slate-500">csv</td>
+            <td class="px-4 py-2">420</td>
+            <td class="px-4 py-2">negative</td>
+            <td class="px-4 py-2">-0.21</td>
+            <td class="px-4 py-2">2</td>
+            <td class="px-4 py-2 text-slate-500">8 Apr 2026, 14:32</td>
+            <td class="px-4 py-2 text-right"><button class="text-xs text-red-600 hover:underline">Delete</button></td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2 font-medium">Multilingual manifesto snippets</td>
+            <td class="px-4 py-2 text-slate-500">paste</td>
+            <td class="px-4 py-2">6</td>
+            <td class="px-4 py-2">positive</td>
+            <td class="px-4 py-2">0.31</td>
+            <td class="px-4 py-2">4</td>
+            <td class="px-4 py-2 text-slate-500">8 Apr 2026, 13:02</td>
+            <td class="px-4 py-2 text-right"><button class="text-xs text-red-600 hover:underline">Delete</button></td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2 font-medium">curl smoke test</td>
+            <td class="px-4 py-2 text-slate-500">api</td>
+            <td class="px-4 py-2">2</td>
+            <td class="px-4 py-2">negative</td>
+            <td class="px-4 py-2">0.02</td>
+            <td class="px-4 py-2">1</td>
+            <td class="px-4 py-2 text-slate-500">8 Apr 2026, 12:15</td>
+            <td class="px-4 py-2 text-right"><button class="text-xs text-red-600 hover:underline">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODULE CARDS -->
+  <h3 class="mt-12 text-lg font-semibold">Modules</h3>
+  <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <a href="#analyze-csv" class="block rounded-lg border border-slate-200 bg-white p-6 hover:border-blue-500 hover:shadow">
+      <h4 class="font-semibold">Batch & CSV Analysis</h4>
+      <p class="mt-2 text-sm text-slate-500">Upload a CSV or paste rows — multilingual sentiment, language mix, top phrases</p>
+      <p class="mt-4 text-xs uppercase tracking-wide text-green-600">Live</p>
+    </a>
+    <a href="#" class="block rounded-lg border border-slate-200 bg-white p-6 hover:border-blue-500 hover:shadow">
+      <h4 class="font-semibold">Single Text Analysis</h4>
+      <p class="mt-2 text-sm text-slate-500">Analyse any text — speech, manifesto, post — instantly</p>
+      <p class="mt-4 text-xs uppercase tracking-wide text-green-600">Live</p>
+    </a>
+    <div class="rounded-lg border border-slate-200 bg-white p-6">
+      <h4 class="font-semibold">Voter Personas</h4>
+      <p class="mt-2 text-sm text-slate-500">LLM-generated personas grounded in real conversation data</p>
+      <p class="mt-4 text-xs uppercase tracking-wide text-blue-600">Coming Phase 4</p>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-6">
+      <h4 class="font-semibold">AI Strategic Advisor</h4>
+      <p class="mt-2 text-sm text-slate-500">Multi-LLM strategy recommendations from your data</p>
+      <p class="mt-4 text-xs uppercase tracking-wide text-blue-600">Coming Phase 4</p>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-6">
+      <h4 class="font-semibold">Bias & Fairness Audit</h4>
+      <p class="mt-2 text-sm text-slate-500">Detect and report on model bias across demographics</p>
+      <p class="mt-4 text-xs uppercase tracking-wide text-blue-600">Coming Phase 4</p>
+    </div>
+    <a href="#" class="block rounded-lg border border-slate-200 bg-white p-6 hover:border-blue-500 hover:shadow">
+      <h4 class="font-semibold">Country Configuration</h4>
+      <p class="mt-2 text-sm text-slate-500">Configure parties, electoral system, languages</p>
+      <p class="mt-4 text-xs uppercase tracking-wide text-green-600">Live</p>
+    </a>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- /analyze — CSV UPLOAD MODE                                       -->
+<!-- ================================================================ -->
+<section id="analyze-csv" class="max-w-5xl mx-auto px-6 pt-20">
+  <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+    <h1 class="text-xl font-bold">CampaignIQ</h1>
+    <a href="#dashboard" class="text-sm text-slate-500">← Back to dashboard</a>
+  </div>
+
+  <h2 class="mt-10 text-3xl font-bold">Text Analysis</h2>
+  <p class="mt-2 text-slate-500">
+    Paste any piece of text — a speech, a tweet, a manifesto excerpt — or drop a whole CSV.
+    Multilingual sentiment, key phrases, and aggregate stats in one call.
+  </p>
+
+  <!-- Mode tabs -->
+  <div class="mt-6 inline-flex rounded-md border border-slate-200 p-1 bg-white">
+    <button class="tab-btn rounded px-4 py-1.5 text-sm font-medium text-slate-500">Single text</button>
+    <button class="tab-btn rounded px-4 py-1.5 text-sm font-medium text-slate-500">Batch paste</button>
+    <button class="tab-btn active rounded px-4 py-1.5 text-sm font-medium">CSV upload</button>
+  </div>
+
+  <!-- CSV parsed state -->
+  <div class="mt-8 space-y-4">
+    <div class="flex flex-wrap items-center gap-3 rounded-md border border-slate-200 bg-slate-100 px-4 py-3 text-sm">
+      <span class="font-medium">uk-housing-tweets.csv</span>
+      <span class="text-slate-500">· 420 rows · 6 columns</span>
+      <button class="ml-auto border border-slate-200 rounded-md px-3 py-1 bg-white text-xs">Choose different file</button>
+    </div>
+
+    <div>
+      <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Text column</label>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <button class="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm">id</button>
+        <button class="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm">created_at</button>
+        <button class="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm">user</button>
+        <button class="rounded-full border-blue-600 border bg-blue-600 text-white px-3 py-1 text-sm">text</button>
+        <button class="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm">retweets</button>
+        <button class="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm">likes</button>
+      </div>
+      <p class="mt-2 text-xs text-slate-500">Auto-picked <code>text</code> (longest mean length + name match).</p>
+    </div>
+
+    <!-- Preview table -->
+    <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+          <tr><th class="w-10 px-3 py-2">#</th><th class="px-3 py-2">text</th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr><td class="px-3 py-2 text-slate-500">1</td><td class="px-3 py-2">The new housing policy is a bold step forward for working families.</td></tr>
+          <tr><td class="px-3 py-2 text-slate-500">2</td><td class="px-3 py-2">This government has completely failed on affordable homes.</td></tr>
+          <tr><td class="px-3 py-2 text-slate-500">3</td><td class="px-3 py-2">Today's debate covered tax, immigration, and the NHS.</td></tr>
+          <tr><td class="px-3 py-2 text-slate-500">4</td><td class="px-3 py-2">Labour's manifesto has some good ideas but the numbers don't add up.</td></tr>
+          <tr><td class="px-3 py-2 text-slate-500">5</td><td class="px-3 py-2">Rent caps would crash the market, experts warn.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button class="rounded-md bg-slate-900 text-white px-4 py-2 text-sm font-medium">Analyse 420 rows</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- BATCH RESULTS with Save + Export                                 -->
+<!-- ================================================================ -->
+<section id="analyze-results" class="max-w-5xl mx-auto px-6 pt-20 pb-24">
+  <h2 class="text-2xl font-bold">Batch results</h2>
+  <p class="mt-1 text-sm text-slate-500">Same shape for Batch paste and CSV upload. New in Phase 2: Save + Export buttons.</p>
+
+  <!-- ACTION BAR -->
+  <div class="mt-6 flex flex-wrap items-center gap-3 rounded-md border border-slate-200 bg-slate-100/60 px-4 py-3">
+    <button class="rounded-md bg-slate-900 text-white px-4 py-2 text-sm font-medium">Save analysis</button>
+    <button class="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium">Export CSV</button>
+    <span class="text-sm text-green-700">Saved as "UK housing policy — Twitter sample" — visible on your dashboard.</span>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Texts analysed</p>
+      <p class="mt-2 text-2xl font-bold">420</p>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Mean compound</p>
+      <p class="mt-2 text-2xl font-bold">-0.21 <span class="text-xs text-slate-500 font-normal">(−1..+1)</span></p>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Dominant label</p>
+      <p class="mt-2 text-lg font-bold capitalize">Negative</p>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-5">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Languages</p>
+      <p class="mt-2 text-lg font-bold">2</p>
+    </div>
+  </div>
+
+  <!-- Label distribution -->
+  <div class="mt-6 rounded-lg border border-slate-200 bg-white p-6">
+    <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Label distribution</h3>
+    <div class="mt-4 space-y-4">
+      <div>
+        <div class="flex justify-between text-sm"><span>Positive</span><span class="text-slate-500">34% · 143 rows</span></div>
+        <div class="progress mt-1"><div class="bg-green-500" style="width:34%"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm"><span>Neutral</span><span class="text-slate-500">21% · 88 rows</span></div>
+        <div class="progress mt-1"><div class="bg-slate-400" style="width:21%"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm"><span>Negative</span><span class="text-slate-500">45% · 189 rows</span></div>
+        <div class="progress mt-1"><div class="bg-red-500" style="width:45%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Language mix -->
+  <div class="mt-6 rounded-lg border border-slate-200 bg-white p-6">
+    <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Language mix</h3>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <span class="chip">🇬🇧 <code class="text-xs">en</code> · 398</span>
+      <span class="chip">🇫🇷 <code class="text-xs">fr</code> · 22</span>
+    </div>
+  </div>
+
+  <!-- Top phrases -->
+  <div class="mt-6 rounded-lg border border-slate-200 bg-white p-6">
+    <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Top phrases across batch</h3>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <span class="rounded-md border border-slate-200 bg-slate-100 px-3 py-1 text-sm" style="opacity:1">housing policy</span>
+      <span class="rounded-md border border-slate-200 bg-slate-100 px-3 py-1 text-sm" style="opacity:.9">affordable homes</span>
+      <span class="rounded-md border border-slate-200 bg-slate-100 px-3 py-1 text-sm" style="opacity:.82">rent caps</span>
+      <span class="rounded-md border border-slate-200 bg-slate-100 px-3 py-1 text-sm" style="opacity:.72">working families</span>
+      <span class="rounded-md border border-slate-200 bg-slate-100 px-3 py-1 text-sm" style="opacity:.64">manifesto</span>
+      <span class="rounded-md border border-slate-200 bg-slate-100 px-3 py-1 text-sm" style="opacity:.6">tax and immigration</span>
+    </div>
+  </div>
+
+  <!-- Per-text results -->
+  <div class="mt-6 rounded-lg border border-slate-200 bg-white">
+    <div class="border-b border-slate-200 px-6 py-4">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Per-text results (showing 3 of 420)</h3>
+    </div>
+    <ul class="divide-y divide-slate-100">
+      <li class="px-6 py-4 text-sm">
+        <div class="flex items-center gap-3">
+          <span class="label-badge label-pos">positive</span>
+          <span class="text-xs text-slate-500">92% · 0.81</span>
+          <span class="text-xs text-slate-500">🇬🇧 en</span>
+        </div>
+        <p class="mt-1 text-slate-900 line-clamp-2">The new housing policy is a bold step forward for working families.</p>
+      </li>
+      <li class="px-6 py-4 text-sm">
+        <div class="flex items-center gap-3">
+          <span class="label-badge label-neg">negative</span>
+          <span class="text-xs text-slate-500">89% · -0.77</span>
+          <span class="text-xs text-slate-500">🇬🇧 en</span>
+        </div>
+        <p class="mt-1 text-slate-900 line-clamp-2">This government has completely failed on affordable homes.</p>
+      </li>
+      <li class="px-6 py-4 text-sm">
+        <div class="flex items-center gap-3">
+          <span class="label-badge label-neu">neutral</span>
+          <span class="text-xs text-slate-500">71% · 0.04</span>
+          <span class="text-xs text-slate-500">🇬🇧 en</span>
+        </div>
+        <p class="mt-1 text-slate-900 line-clamp-2">Today's debate covered tax, immigration, and the NHS.</p>
+      </li>
+    </ul>
+  </div>
+
+  <p class="mt-4 text-xs text-slate-500">Model: <code>cardiffnlp/twitter-xlm-roberta-base-sentiment</code> · 420 texts</p>
+</section>
+
+</body>
+</html>

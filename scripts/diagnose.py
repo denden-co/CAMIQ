@@ -3,7 +3,7 @@
 Usage:
     cd ~/Desktop/Cam/CAMIQ/api
     source .venv/bin/activate
-    python ../diagnose.py
+    python ../scripts/diagnose.py
 """
 
 import sys

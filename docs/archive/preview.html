@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CampaignIQ — Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --border: 214 32% 91%;
+  }
+  body { font-family: system-ui, -apple-system, sans-serif; background: hsl(var(--background)); color: hsl(var(--foreground)); }
+  .bg-background { background: hsl(var(--background)); }
+  .bg-primary { background: hsl(var(--primary)); }
+  .text-primary { color: hsl(var(--primary)); }
+  .text-primary-foreground { color: hsl(var(--primary-foreground)); }
+  .bg-muted { background: hsl(var(--muted)); }
+  .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+  .border-border { border-color: hsl(var(--border)); }
+  .text-foreground { color: hsl(var(--foreground)); }
+</style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Tabs -->
+  <nav class="sticky top-0 z-10 border-b border-border bg-background/90 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center gap-2 px-6 py-3">
+      <span class="mr-4 text-sm font-bold">CampaignIQ Preview</span>
+      <button onclick="show('landing')" id="tab-landing" class="rounded-md border border-border px-3 py-1 text-sm hover:bg-muted">Landing</button>
+      <button onclick="show('login')" id="tab-login" class="rounded-md border border-border px-3 py-1 text-sm hover:bg-muted">Login</button>
+      <button onclick="show('dashboard')" id="tab-dashboard" class="rounded-md border border-border px-3 py-1 text-sm hover:bg-muted">Dashboard</button>
+      <span class="ml-auto text-xs text-muted-foreground">Static preview — auth not wired</span>
+    </div>
+  </nav>
+
+  <!-- Landing -->
+  <main id="screen-landing" class="screen">
+    <section class="mx-auto flex max-w-5xl flex-col items-center justify-center px-6 py-24 text-center">
+      <span class="mb-6 rounded-full border border-border bg-muted px-4 py-1 text-sm text-muted-foreground">Global Political Intelligence Platform</span>
+      <h1 class="text-5xl font-bold tracking-tight sm:text-6xl">CampaignIQ</h1>
+      <p class="mt-6 max-w-2xl text-lg text-muted-foreground">
+        Sentiment analysis, voter personas, and AI strategy for elections worldwide.
+        Multilingual, electoral-system aware, and built on peer-reviewed research.
+      </p>
+      <div class="mt-10 flex gap-4">
+        <button onclick="show('login')" class="rounded-md bg-primary px-6 py-3 text-primary-foreground shadow-sm transition hover:opacity-90">Sign in</button>
+        <button onclick="show('dashboard')" class="rounded-md border border-border bg-background px-6 py-3 transition hover:bg-muted">View dashboard</button>
+      </div>
+      <p class="mt-16 text-xs text-muted-foreground">Derived from doctoral research at the University of East London</p>
+    </section>
+  </main>
+
+  <!-- Login -->
+  <main id="screen-login" class="screen hidden">
+    <div class="flex min-h-[80vh] items-center justify-center px-6 py-12">
+      <div class="w-full max-w-sm space-y-6 rounded-lg border border-border bg-background p-8 shadow-sm">
+        <div class="text-center">
+          <h1 class="text-2xl font-bold">CampaignIQ</h1>
+          <p class="mt-1 text-sm text-muted-foreground">Sign in to your account</p>
+        </div>
+        <form class="space-y-4" onsubmit="event.preventDefault(); show('dashboard');">
+          <div>
+            <label class="text-sm font-medium">Email</label>
+            <input type="email" value="everton@uel.ac.uk" class="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Password</label>
+            <input type="password" value="••••••••" class="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2" />
+          </div>
+          <button type="submit" class="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">Sign in</button>
+        </form>
+        <button class="block w-full text-center text-sm text-muted-foreground hover:text-foreground">Need an account? Sign up</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Dashboard -->
+  <main id="screen-dashboard" class="screen hidden">
+    <header class="border-b border-border">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <h1 class="text-xl font-bold">CampaignIQ</h1>
+        <div class="flex items-center gap-4">
+          <span class="text-sm text-muted-foreground">everton@uel.ac.uk</span>
+          <button class="rounded-md border border-border px-3 py-1 text-sm hover:bg-muted">Sign out</button>
+        </div>
+      </div>
+    </header>
+    <section class="mx-auto max-w-6xl px-6 py-12">
+      <h2 class="text-3xl font-bold">Welcome, Everton</h2>
+      <p class="mt-2 text-muted-foreground">Your role: <span class="font-medium text-foreground">analyst</span></p>
+      <div class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" id="cards"></div>
+    </section>
+  </main>
+
+  <script>
+    const cards = [
+      ["Social Data Analysis", "Sentiment and topics from Twitter/X, Reddit, and news", "Coming Phase 2"],
+      ["Single Text Analysis", "Analyse any text — speech, manifesto, post — instantly", "Coming Phase 2"],
+      ["Voter Personas", "LLM-generated personas grounded in real conversation data", "Coming Phase 4"],
+      ["AI Strategic Advisor", "Multi-LLM strategy recommendations from your data", "Coming Phase 4"],
+      ["Bias & Fairness Audit", "Detect and report on model bias across demographics", "Coming Phase 4"],
+      ["Country Configuration", "Configure parties, electoral system, languages", "Coming Phase 1"],
+    ];
+    document.getElementById("cards").innerHTML = cards.map(([t,d,s]) => `
+      <div class="rounded-lg border border-border bg-background p-6 shadow-sm">
+        <h3 class="font-semibold">${t}</h3>
+        <p class="mt-2 text-sm text-muted-foreground">${d}</p>
+        <p class="mt-4 text-xs uppercase tracking-wide text-primary">${s}</p>
+      </div>`).join("");
+
+    function show(name) {
+      ["landing","login","dashboard"].forEach(n => {
+        document.getElementById("screen-"+n).classList.toggle("hidden", n !== name);
+        const tab = document.getElementById("tab-"+n);
+        if (n === name) { tab.classList.add("bg-muted","font-medium"); }
+        else { tab.classList.remove("bg-muted","font-medium"); }
+      });
+    }
+    show("landing");
+  </script>
+</body>
+</html>

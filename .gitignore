@@ -13,9 +13,6 @@ build/
 frontend/tsconfig.tsbuildinfo
 
 # Local scratch
-preview.html
-phase2-preview.html
-UI_REFRESH_PREVIEW.html
 api/data/
 api/*.log
 
