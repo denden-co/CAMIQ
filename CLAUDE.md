@@ -127,15 +127,10 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
 
 ### From the frontend audit — still outstanding
 
-(Full doc: [`FRONTEND_AUDIT_2026-04-29.md`](./FRONTEND_AUDIT_2026-04-29.md). Priority 1 wins are all shipped.)
+(Full doc: [`docs/FRONTEND_AUDIT_2026-04-29.md`](./docs/FRONTEND_AUDIT_2026-04-29.md). Priority 1 wins shipped 2026-04-29; Priorities 2.3, 2.4, 3.2, 3.3, 3.5 shipped 2026-06-10.)
 
 - **Priority 2.2** — replace mock product preview on `/` with a live snapshot of an actual analysis
-- **Priority 2.3** — global ⌘K command palette (`cmdk` library)
-- **Priority 2.4** — module-to-module nav rail (currently only "← Dashboard" back-link)
 - **Priority 3.1** — decide whether `/` should drop the marketing page entirely (Option B in audit)
-- **Priority 3.2** — fill in `/legal/{privacy,terms,cookies,security}` stubs or hide from footer
-- **Priority 3.3** — rename misleading legacy classes (`btn-gradient` → `btn-primary`, etc.)
-- **Priority 3.5** — eslint 8 → 9 migration (flat config) so `npm run lint` works again
 
 ### Security log
 
@@ -150,6 +145,17 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
 ### Session notes
 
 - GitHub repo: https://github.com/denden-co/CAMIQ
+- **Session 2026-06-10 (professional-polish pass):**
+  - **Repo restructure:** scratch files moved out of root — plans/audits → `docs/`, old HTML previews → `docs/archive/`, helper scripts → `scripts/`, test CSVs → `samples/`. Root now: README, CLAUDE.md, api, frontend, shared, docs, samples, scripts.
+  - **Legacy class rename (audit 3.3):** `btn-gradient` → `btn-primary`, `text-gradient` → Tailwind `text-accent`, `hero-mesh` → plain `bg-background`, `card-glass` → `card-surface`, `divider-gradient` → `divider`. Dead aliases and unused animations deleted from globals.css.
+  - **ESLint 9 (audit 3.5):** flat config at `frontend/eslint.config.mjs` (FlatCompat + next/core-web-vitals). `next lint` is gone in Next 16, so `npm run lint` = `eslint .`. **Run `npm install --legacy-peer-deps` once to pull eslint 9 + @eslint/eslintrc.**
+  - **⌘K command palette (audit 2.3):** `components/command-palette.tsx`, dependency-free (no cmdk), mounted in root layout. ⌘K/Ctrl-K everywhere; buttons dispatch `camiq:open-palette`.
+  - **Module nav rail (audit 2.4):** `components/module-nav.tsx` — module links in PageShell top bar (hidden < md), current page highlighted, plus ⌘K trigger button.
+  - **Legal pages (audit 3.2):** real UK-GDPR-aware content for `/legal/{privacy,terms,cookies,security}` via shared `components/legal-page.tsx`. ⚠️ Drafted by AI — have a solicitor review before public launch.
+  - **Deployment prep (Phase 7):** CORS origins now read from `CORS_ORIGINS` env var (api/main.py); `api/.env.example`, `frontend/.env.example`, `api/Procfile`, `api/render.yaml`, and step-by-step [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md).
+  - **README** rewritten to match the shipped product (Next 16/React 19, accurate modules, new repo layout).
+  - Typed routes: new nav components use `Route` from "next" for href types.
+  - Verified: `tsc --noEmit` clean, `py_compile main.py` clean. `npm run lint`/`next build` still to be verified on the Mac after `npm install --legacy-peer-deps`.
 - **Session 2026-04-29:**
   - Security patch (commit `b9d2c96`) + ~18 days of accumulated Phase 6 follow-up shipped.
   - Wrote [`FRONTEND_AUDIT_2026-04-29.md`](./FRONTEND_AUDIT_2026-04-29.md) — full audit against the Frontend Prompt Instructions rubric (29 Apr 2026, e.dennis7@icloud.com → eveden02@icloud.com email).

@@ -1,127 +1,111 @@
 # CampaignIQ (CAMIQ)
 
-**Global political intelligence platform** — turn social media data into actionable campaign insights for elections worldwide.
+**Global political intelligence platform** — turn social media data into evidence-based campaign insight, for elections anywhere in the world.
 
-CampaignIQ operationalises doctoral research on sentiment analysis and election forecasting into a web tool usable by campaign strategists, pollsters, media, academia, and policymakers in any country.
+CampaignIQ operationalises doctoral research on sentiment analysis and election signals into a web platform for campaign strategists, researchers, media, and policymakers. It is a **measurement and diagnostic tool, not an election predictor**.
 
-## What It Does
+## Features
 
-**Social Data Analysis** — Upload a CSV of social media posts, select political parties, and run sentiment analysis across 20+ algorithms. Get prediction dashboards with vote share estimates, confidence scores, and model comparisons.
+| Module | What it does |
+|--------|--------------|
+| **Text Analysis** | Single text, batch paste, or CSV upload. Multilingual sentiment via XLM-RoBERTa (100+ languages) with VADER fallback, language auto-detection, key-phrase extraction, aggregate stats, save & export. |
+| **Topic Modelling** | BERTopic over saved analyses (TF-IDF + KMeans fallback), per-topic sentiment composition, representative samples, charts. |
+| **Voter Personas** | LLM-generated narrative voter profiles grounded in your analysis data. Multi-provider (Gemini, OpenAI, Claude, Mistral, and more). |
+| **AI Strategic Advisor** | Recommendations, risk factors, and an executive summary generated from saved analyses — adapted to the country's electoral system. |
+| **Bias & Fairness Audit** | 4/5ths rule, chi-square independence, corpus skew, and per-language-group breakdowns. |
+| **Country Configuration** | JSON profiles per country: parties, electoral system (FPTP, PR, MMP, two-round, electoral college), languages. Forward-looking election catalogue. |
 
-**Single Text Analysis** — Analyse any political text for emotional tone (joy, sadness, anger, surprise, fear) and topical insights. Visualised with radar charts and topic tags.
-
-**Voter Persona Generator** — Input demographics, concerns, and values. Get AI-generated narrative voter profiles with backstory, political leanings, and engagement strategies.
-
-**AI Strategic Advisor** — Feed analysis results into an LLM-powered advisor that generates campaign recommendations tailored to your country's electoral system.
-
-**Bias & Fairness Audit** — Check model objectivity with Gini coefficient analysis and fairness metrics across demographic groups.
-
-## Global by Design
-
-CampaignIQ works for any country's elections, not just one. It adapts to different electoral systems (FPTP, proportional representation, MMP, two-round), languages (100+ via XLM-RoBERTa), and political landscapes through a JSON configuration system.
-
-Pre-built profiles are included for the UK, USA, India, France, Germany, Brazil, Nigeria, and more. Users can also create custom election configurations with their own parties, languages, and electoral rules.
-
-## Tech Stack
+## Tech stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 14+ (App Router), TypeScript, Tailwind CSS, shadcn/ui, Recharts |
+| Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Recharts, lucide-react |
 | Backend | Python FastAPI |
-| ML/NLP | XLM-RoBERTa, BERTweet, VADER, TextBlob, SVM, Random Forest, XGBoost, CNN, LSTM, BERTopic, LDA, NMF |
-| Database | Supabase (PostgreSQL, Auth, Storage, Row Level Security) |
-| LLM Providers | Google Gemini, OpenAI, Anthropic Claude, Deepseek, Mistral, Cohere, Meta Llama, HuggingFace |
-| Deployment | Vercel (frontend), Railway/Render (API) |
+| ML / NLP | XLM-RoBERTa, BERTweet, VADER, BERTopic, sentence-transformers, scikit-learn |
+| LLM providers | Google Gemini, OpenAI, Anthropic Claude, Deepseek, Mistral, Cohere, Meta Llama, HuggingFace, custom OpenAI-compatible |
+| Database / Auth | Supabase (PostgreSQL, Auth, Storage, RLS) — being integrated; dev-mock auth in the meantime |
+| Deployment | Vercel (frontend) + Railway/Render (API) |
 
-## Getting Started
+## Repository structure
+
+```
+CAMIQ/
+├── frontend/        # Next.js app
+├── api/             # FastAPI backend
+│   ├── main.py      # API entry point
+│   ├── app/         # Routers, schemas, services (sentiment, topics, personas, strategy, audit)
+│   └── configs/
+│       └── countries/   # Election JSON profiles
+├── shared/          # Shared types and configs
+├── docs/            # Plans, audits, session notes (archive/ for old previews)
+├── samples/         # Sample CSVs for testing
+├── scripts/         # Dev helper scripts (.command launchers, diagnostics)
+└── CLAUDE.md        # Project state & config for AI-assisted development
+```
+
+## Getting started
 
 ### Prerequisites
 
-- Node.js 18+
-- Python 3.10+
-- Supabase account
+- Node.js 20+
+- Python 3.12+ (3.14 works on the slim path; some ML wheels need 3.12)
 
 ### Frontend
 
 ```bash
 cd frontend
-npm install
-npm run dev
+npm install --legacy-peer-deps
+npm run dev          # http://localhost:3000
 ```
 
 ### Backend
 
 ```bash
 cd api
-pip install -r requirements.txt
-uvicorn main:app --reload
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt        # slim: FastAPI + VADER fallback
+pip install -r requirements-ml.txt     # optional: XLM-RoBERTa, BERTopic (heavy)
+uvicorn main:app --reload --port 8000  # http://localhost:8000
 ```
 
-### Environment Variables
+> **Note:** always start the backend from an *activated* venv. Without the ML
+> dependencies the API silently falls back to VADER sentiment. `/health`
+> reports which backend is active.
 
-Create `.env.local` in `frontend/` and `.env` in `api/`:
+### Environment variables
 
-```
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+Copy the examples and fill in your keys:
 
-# LLM Providers (add whichever you use)
-OPENAI_API_KEY=your-key
-ANTHROPIC_API_KEY=your-key
-GOOGLE_AI_API_KEY=your-key
+```bash
+cp frontend/.env.example frontend/.env.local
+cp api/.env.example api/.env
 ```
 
-## Project Structure
+See those files for the full list (Supabase keys, LLM provider keys, API URL, CORS origins).
 
-```
-CAMIQ/
-├── frontend/          # Next.js app (TypeScript, Tailwind, shadcn/ui)
-├── api/               # Python FastAPI backend
-│   ├── main.py        # API entry point
-│   ├── app/
-│   │   ├── services/
-│   │   │   ├── sentiment/      # RoBERTa, BERTweet, VADER, ensemble
-│   │   │   ├── classifiers/    # SVM, RF, XGBoost, CNN, LSTM
-│   │   │   ├── topics/         # BERTopic, LDA, NMF, TF-IDF
-│   │   │   ├── clustering/     # K-Means, DBSCAN
-│   │   │   ├── statistics/     # ANOVA, chi-square, regression
-│   │   │   ├── nlp/            # NER, Word2Vec, GloVe
-│   │   │   ├── llm/            # Multi-provider abstraction (9+ providers)
-│   │   │   ├── data_cleaning/  # Dedup, nulls, bots, encoding, language
-│   │   │   ├── personas/       # Voter persona generation
-│   │   │   ├── strategy/       # AI strategic advisor
-│   │   │   └── audit/          # Bias & fairness
-│   │   └── configs/
-│   │       └── countries/      # Election JSON profiles (UK, USA, etc.)
-│   └── tests/
-├── shared/            # Shared types and configs
-├── PLAN.md            # Development plan (gstack format)
-└── CLAUDE.md          # Project config for AI-assisted development
-```
+### Scripts
 
-## Algorithms
+| Command | Where | What |
+|---------|-------|------|
+| `npm run dev` | `frontend/` | Dev server |
+| `npm run build` | `frontend/` | Production build |
+| `npm run lint` | `frontend/` | ESLint (flat config, eslint 9) |
+| `npm run typecheck` | `frontend/` | TypeScript check |
+| `npm run test` | `frontend/` | Vitest |
+| `pytest` | `api/` | Backend tests |
+| `scripts/start-camiq.command` | repo root | macOS: launch backend + frontend in Terminal tabs |
 
-### Sentiment Analysis
-XLM-RoBERTa (multilingual, 100+ languages), BERTweet (English specialist), VADER (lexicon-based), TextBlob (pattern-based), and a weighted ensemble model that achieved 80.3% accuracy/F1 for 3-class sentiment in doctoral research.
+## Deployment
 
-### Classification
-Support Vector Machines (SVM), Random Forest, XGBoost, Logistic Regression, Convolutional Neural Networks (CNN), Long Short-Term Memory (LSTM/BiLSTM).
+- **Frontend → Vercel.** Root directory `frontend/`. Set the env vars from `frontend/.env.example`.
+- **API → Railway or Render.** Root directory `api/`. A `Procfile` and `render.yaml` are provided. Set `CORS_ORIGINS` to your frontend URL.
 
-### Topic Modelling
-BERTopic (transformer-based), Latent Dirichlet Allocation (LDA), Non-negative Matrix Factorisation (NMF), TF-IDF keyword extraction.
-
-### Clustering & Statistics
-K-Means, DBSCAN, two-way ANOVA, chi-square tests, correlation analysis, regression modelling.
+See `docs/` for the full deployment plan.
 
 ## Origin
 
-Derived from the doctoral thesis *"Analyzing Twitter/X Sentiment and Topic Signals for the 2024 UK General Election"* by Everton Dennis at the University of East London. The research demonstrated that while social media sentiment provides valuable directional insights, accurate seat-level predictions under FPTP require constituency-level modelling (MRP). CampaignIQ is built as a measurement and diagnostic tool, not an election predictor.
-
-## Development
-
-This project uses [gstack](https://github.com/garrytan/gstack) for structured AI-assisted development workflows.
+Derived from the doctoral thesis *“Analyzing Twitter/X Sentiment and Topic Signals for the 2024 UK General Election”* by Everton Dennis, University of East London. The thesis ensemble model (weighted XLM-RoBERTa + BERTweet) achieved **80.3% accuracy/F1** for 3-class sentiment. The research showed social sentiment gives valuable directional insight, while seat-level prediction under FPTP needs constituency-level modelling — hence CampaignIQ's positioning as a diagnostic tool.
 
 ## Licence
 
