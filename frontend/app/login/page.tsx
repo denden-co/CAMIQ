@@ -27,7 +27,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="hero-mesh flex min-h-screen items-center justify-center px-5">
+    <main className="bg-background flex min-h-screen items-center justify-center px-5">
       {/* Decorative orbs */}
       <div className="pointer-events-none fixed -left-40 top-1/3 h-80 w-80 rounded-full bg-primary/8 blur-3xl" />
       <div className="pointer-events-none fixed -right-40 bottom-1/3 h-64 w-64 rounded-full bg-accent/8 blur-3xl" />
@@ -36,7 +36,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <Link href="/" className="text-2xl font-bold tracking-tight">
-            Campaign<span className="text-gradient">IQ</span>
+            Campaign<span className="text-accent">IQ</span>
           </Link>
         </div>
 

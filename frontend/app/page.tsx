@@ -93,7 +93,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/login"
-              className="btn-gradient rounded-lg px-4 py-2 text-sm"
+              className="btn-primary rounded-lg px-4 py-2 text-sm"
             >
               Start free
             </Link>
@@ -102,7 +102,7 @@ export default async function HomePage() {
       </nav>
 
       {/* ──────────────────────────────── Hero ─────────────────────────────── */}
-      <section className="hero-mesh">
+      <section className="bg-background">
         <div className="mx-auto max-w-6xl px-5 pb-20 pt-20 sm:px-8 sm:pt-24">
           <div className="max-w-3xl">
             <div className="chip mb-6">
@@ -113,7 +113,7 @@ export default async function HomePage() {
             <h1 className="font-display text-5xl font-semibold leading-[1.05] text-foreground sm:text-6xl lg:text-7xl">
               Political intelligence,
               <br />
-              <span className="text-gradient">grounded in evidence.</span>
+              <span className="text-accent">grounded in evidence.</span>
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
@@ -125,7 +125,7 @@ export default async function HomePage() {
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <Link
                 href="/login"
-                className="btn-gradient rounded-lg px-5 py-3 text-sm"
+                className="btn-primary rounded-lg px-5 py-3 text-sm"
               >
                 Start free — no card required
               </Link>

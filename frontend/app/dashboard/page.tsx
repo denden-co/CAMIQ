@@ -139,7 +139,7 @@ export default function DashboardPage() {
       <header className="nav-bar sticky top-0 z-40">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8 sm:py-4">
           <Link href="/dashboard" className="text-lg font-bold tracking-tight">
-            Campaign<span className="text-gradient">IQ</span>
+            Campaign<span className="text-accent">IQ</span>
           </Link>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <CountryPicker />

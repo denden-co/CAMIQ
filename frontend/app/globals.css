@@ -10,9 +10,6 @@
      indigo accent for emphasis.
    • Subtle 1px borders instead of heavy shadows and glows.
    • Typography does the heavy lifting, not decoration.
-   • Backward-compatible: existing class names (btn-gradient,
-     text-gradient, card-glass, hero-mesh, etc.) are retained
-     but now render the new clean look.
    ─────────────────────────────────────────────────────────── */
 
 @layer base {
@@ -92,25 +89,9 @@
 }
 
 @layer components {
-  /* ── Card surface (was glass with backdrop-blur) ── */
-  .card-glass {
+  /* ── Card surface ───────────────────────────────── */
+  .card-surface {
     @apply rounded-xl border border-border bg-card shadow-sm;
-  }
-
-  /* ── Border wrapper (was gradient border) ──────── */
-  .gradient-border {
-    @apply rounded-xl border border-border;
-    padding: 0;
-  }
-  .gradient-border > * {
-    border-radius: calc(0.75rem - 1px);
-  }
-
-  /* ── Accented text (was linear-gradient, now solid indigo) ── */
-  .text-gradient {
-    color: hsl(var(--accent));
-    -webkit-text-fill-color: currentColor;
-    background: none;
   }
 
   /* ── Card hover — subtle border strengthen ─────── */
@@ -123,23 +104,18 @@
     box-shadow: none;
   }
 
-  /* ── Primary button — solid ink (was gradient) ── */
-  .btn-gradient {
+  /* ── Primary button — solid ink ─────────────────── */
+  .btn-primary {
     background: hsl(var(--primary));
     color: hsl(var(--primary-foreground));
     @apply font-medium;
     transition: background 0.15s ease;
-    box-shadow: none;
   }
-  .btn-gradient:hover {
+  .btn-primary:hover {
     background: hsl(var(--primary-hover));
-    filter: none;
-    box-shadow: none;
   }
-  .btn-gradient:disabled {
+  .btn-primary:disabled {
     opacity: 0.4;
-    filter: none;
-    box-shadow: none;
   }
 
   /* ── Accent button (indigo) — for secondary hero CTA etc. ── */
@@ -163,7 +139,7 @@
   }
 
   /* ── Section divider — straight line ───────────── */
-  .divider-gradient {
+  .divider {
     height: 1px;
     background: hsl(var(--border));
   }
@@ -179,11 +155,6 @@
     color: hsl(var(--accent));
     background: hsl(var(--accent-soft));
     border-color: transparent;
-  }
-
-  /* ── Hero — clean canvas (was animated mesh) ──── */
-  .hero-mesh {
-    background: hsl(var(--background));
   }
 
   /* ── Navigation bar ─────────────────────────────── */
@@ -223,22 +194,10 @@
 
 /* ───────────────────────────────────────────────────────────
    Animations — minimal, subtle.
-   (Kept for backward compatibility with existing usage.)
    ─────────────────────────────────────────────────────────── */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-float        { animation: float 4s ease-in-out infinite; }
-.animate-pulse-glow   { animation: pulse-soft 3s ease-in-out infinite; }
-.animate-fade-in      { animation: fade-in 0.25s ease-out; }
-.animate-gradient     { /* retained name, now no-op for backwards compat */ }
+.animate-fade-in { animation: fade-in 0.25s ease-out; }

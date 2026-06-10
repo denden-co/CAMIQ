@@ -61,7 +61,7 @@ export default function AnalyzePage() {
             onClick={() => setMode(m)}
             className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all sm:px-5 sm:text-sm ${
               mode === m
-                ? "btn-gradient shadow-sm"
+                ? "btn-primary shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             }`}
           >

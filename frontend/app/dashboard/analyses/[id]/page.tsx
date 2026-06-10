@@ -113,7 +113,7 @@ export default function SavedAnalysisPage() {
       <header className="nav-bar sticky top-0 z-40 print:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-8 sm:py-4">
           <Link href="/dashboard" className="text-lg font-bold tracking-tight">
-            Campaign<span className="text-gradient">IQ</span>
+            Campaign<span className="text-accent">IQ</span>
           </Link>
           <Link
             href="/dashboard"
