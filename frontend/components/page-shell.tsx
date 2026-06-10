@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, type LucideIcon } from "lucide-react";
+import { ModuleNav, PaletteButton } from "@/components/module-nav";
 
 interface PageShellProps {
   title: string;
@@ -28,14 +29,18 @@ export function PageShell({
       {/* ── Top nav ─────────────────────────────────── */}
       <header className="nav-bar sticky top-0 z-40">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-5 sm:px-8">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="logomark">C</span>
-            <span className="text-[15px] font-semibold tracking-tight">
-              CampaignIQ
-            </span>
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <span className="logomark">C</span>
+              <span className="text-[15px] font-semibold tracking-tight">
+                CampaignIQ
+              </span>
+            </Link>
+            <ModuleNav />
+          </div>
           <div className="flex items-center gap-3">
             {headerExtra}
+            <PaletteButton />
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
