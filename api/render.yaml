@@ -1,0 +1,17 @@
+# Render blueprint for the CampaignIQ API.
+# Deploys the slim (VADER) path by default — swap the build command to
+# include requirements-ml.txt when the instance has enough memory for
+# XLM-RoBERTa (~2GB+).
+services:
+  - type: web
+    name: camiq-api
+    runtime: python
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: CORS_ORIGINS
+        sync: false # set to your frontend URL in the Render dashboard

@@ -1,5 +1,7 @@
 """CampaignIQ API — Global Political Intelligence Platform."""
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,13 +22,18 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# CORS — allow the Next.js dev server and any future production origins.
+# CORS — dev origins by default; production origins come from the
+# CORS_ORIGINS env var (comma-separated, e.g. "https://campaigniq.vercel.app").
+_default_origins = "http://localhost:3000,http://127.0.0.1:3000"
+_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", _default_origins).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
