@@ -16,6 +16,7 @@ Environment variables (set in api/.env or the shell):
     MISTRAL_API_KEY      — Mistral
     COHERE_API_KEY       — Cohere
     HF_TOKEN             — HuggingFace Inference router (Llama, Qwen, etc.)
+    DASHSCOPE_API_KEY    — Qwen via Alibaba DashScope (international region)
     CUSTOM_LLM_BASE_URL  — any OpenAI-compatible endpoint
     CUSTOM_LLM_API_KEY   — key for the custom endpoint
     CUSTOM_LLM_MODEL     — model name for the custom endpoint
@@ -100,6 +101,15 @@ PROVIDERS: list[ProviderConfig] = [
         default_model="meta-llama/Llama-3.3-70B-Instruct",
         api_style="openai",  # HF Inference router is OpenAI-compatible
     ),
+    ProviderConfig(
+        name="qwen",
+        env_key="DASHSCOPE_API_KEY",
+        # International (Singapore) endpoint — keys are region-specific;
+        # mainland-China keys need https://dashscope.aliyuncs.com instead.
+        base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        default_model="qwen-plus",
+        api_style="openai",  # DashScope compatible-mode is OpenAI-compatible
+    ),
 ]
 
 PROVIDER_LABELS: dict[str, str] = {
@@ -110,6 +120,7 @@ PROVIDER_LABELS: dict[str, str] = {
     "mistral": "Mistral",
     "cohere": "Cohere",
     "huggingface": "HuggingFace (Meta Llama & more)",
+    "qwen": "Qwen (Alibaba DashScope)",
     "custom": "Custom (OpenAI-compatible)",
 }
 
