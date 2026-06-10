@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()  # Load .env before anything reads os.getenv
 
 from app.routers import analyses, analyze, bias, countries, personas, strategy, topics
-from app.services.llm import available_providers
+from app.services.llm import available_providers, provider_catalogue
 from app.services.sentiment import active_model_name
 
 app = FastAPI(
@@ -50,8 +50,16 @@ app.include_router(strategy.router, prefix="/api", tags=["strategy"])
 
 @app.get("/api/llm/providers")
 async def llm_providers():
-    """Return which LLM providers have API keys configured."""
-    return {"providers": available_providers()}
+    """Return configured providers plus the full supported catalogue.
+
+    `providers` is the legacy shape (configured names only); `catalogue`
+    lists every supported provider with its status so the UI can offer
+    all of them and explain how to enable the rest.
+    """
+    return {
+        "providers": available_providers(),
+        "catalogue": provider_catalogue(),
+    }
 
 
 @app.get("/health")

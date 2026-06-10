@@ -22,6 +22,7 @@ import {
   type StrategyResponse,
 } from "@/lib/api";
 import { Spinner } from "@/components/spinner";
+import { ProviderPicker } from "@/components/provider-picker";
 
 const PRIORITY_COLORS: Record<string, string> = {
   High: "bg-red-100 text-red-800 border-red-200",
@@ -47,6 +48,7 @@ export default function StrategyPage() {
   const [targetParty, setTargetParty] = useState("");
   const [biasAwareness, setBiasAwareness] = useState(true);
   const [provider, setProvider] = useState<string>("");
+  const [model, setModel] = useState<string>("");
 
   const [result, setResult] = useState<StrategyResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -78,6 +80,7 @@ export default function StrategyPage() {
         target_party: targetParty || null,
         bias_awareness: biasAwareness,
         provider: provider || null,
+        model: model || null,
       });
       setResult(res);
     } catch (e) {
@@ -155,23 +158,12 @@ export default function StrategyPage() {
             />
           </label>
 
-          <label className="text-sm">
-            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              LLM provider
-            </span>
-            <select
-              className="input-refined"
-              value={provider}
-              onChange={(e) => setProvider(e.target.value)}
-            >
-              <option value="">Auto (first available)</option>
-              {providers.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </label>
+          <ProviderPicker
+            provider={provider}
+            onProviderChange={setProvider}
+            model={model}
+            onModelChange={setModel}
+          />
 
           <label className="text-sm">
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">

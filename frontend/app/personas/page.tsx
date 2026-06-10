@@ -13,6 +13,7 @@ import {
   type PersonasResponse,
 } from "@/lib/api";
 import { Spinner } from "@/components/spinner";
+import { ProviderPicker } from "@/components/provider-picker";
 
 const SENTIMENT_COLORS: Record<string, string> = {
   positive: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -37,6 +38,7 @@ export default function PersonasPage() {
   const [election, setElection] = useState("");
   const [hint, setHint] = useState("");
   const [provider, setProvider] = useState<string>("");
+  const [model, setModel] = useState<string>("");
 
   const [result, setResult] = useState<PersonasResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -65,6 +67,7 @@ export default function PersonasPage() {
         election: election || null,
         demographics_hint: hint || null,
         provider: provider || null,
+        model: model || null,
       });
       setResult(res);
     } catch (e) {
@@ -145,23 +148,12 @@ export default function PersonasPage() {
             />
           </label>
 
-          <label className="text-sm">
-            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              LLM provider
-            </span>
-            <select
-              className="input-refined"
-              value={provider}
-              onChange={(e) => setProvider(e.target.value)}
-            >
-              <option value="">Auto (first available)</option>
-              {providers.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </label>
+          <ProviderPicker
+            provider={provider}
+            onProviderChange={setProvider}
+            model={model}
+            onModelChange={setModel}
+          />
 
           <label className="text-sm">
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">

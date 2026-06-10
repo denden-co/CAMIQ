@@ -1,7 +1,8 @@
 """Multi-provider LLM abstraction layer (Phase 4).
 
 Supports: Google Gemini, OpenAI, Anthropic Claude, Deepseek, Mistral,
-Cohere, and any OpenAI-compatible endpoint.
+Cohere, HuggingFace (incl. Meta Llama models), and any OpenAI-compatible
+endpoint.
 
 Provider selection is driven by environment variables. At runtime the
 first provider whose API key is set will be used, unless the caller
@@ -14,6 +15,7 @@ Environment variables (set in api/.env or the shell):
     DEEPSEEK_API_KEY     — Deepseek
     MISTRAL_API_KEY      — Mistral
     COHERE_API_KEY       — Cohere
+    HF_TOKEN             — HuggingFace Inference router (Llama, Qwen, etc.)
     CUSTOM_LLM_BASE_URL  — any OpenAI-compatible endpoint
     CUSTOM_LLM_API_KEY   — key for the custom endpoint
     CUSTOM_LLM_MODEL     — model name for the custom endpoint
@@ -91,7 +93,25 @@ PROVIDERS: list[ProviderConfig] = [
         default_model="command-r",
         api_style="openai",  # Cohere v2 chat is OpenAI-compatible
     ),
+    ProviderConfig(
+        name="huggingface",
+        env_key="HF_TOKEN",
+        base_url="https://router.huggingface.co/v1",
+        default_model="meta-llama/Llama-3.3-70B-Instruct",
+        api_style="openai",  # HF Inference router is OpenAI-compatible
+    ),
 ]
+
+PROVIDER_LABELS: dict[str, str] = {
+    "google": "Google Gemini",
+    "openai": "OpenAI",
+    "anthropic": "Anthropic Claude",
+    "deepseek": "Deepseek",
+    "mistral": "Mistral",
+    "cohere": "Cohere",
+    "huggingface": "HuggingFace (Meta Llama & more)",
+    "custom": "Custom (OpenAI-compatible)",
+}
 
 
 def _custom_provider() -> ProviderConfig | None:
@@ -136,6 +156,35 @@ def available_providers() -> list[str]:
     if _custom_provider():
         names.append("custom")
     return names
+
+
+def provider_catalogue() -> list[dict[str, Any]]:
+    """Return every supported provider with its configuration status.
+
+    Used by the frontend to render a full provider picker — configured
+    providers are selectable, the rest show which env key would enable them.
+    """
+    catalogue: list[dict[str, Any]] = [
+        {
+            "name": p.name,
+            "label": PROVIDER_LABELS.get(p.name, p.name),
+            "default_model": p.default_model,
+            "env_key": p.env_key,
+            "configured": bool(os.getenv(p.env_key)),
+        }
+        for p in PROVIDERS
+    ]
+    custom = _custom_provider()
+    catalogue.append(
+        {
+            "name": "custom",
+            "label": PROVIDER_LABELS["custom"],
+            "default_model": custom.default_model if custom else None,
+            "env_key": "CUSTOM_LLM_BASE_URL + CUSTOM_LLM_API_KEY",
+            "configured": custom is not None,
+        }
+    )
+    return catalogue
 
 
 def _resolve_provider(name: str | None = None) -> tuple[ProviderConfig, str]:

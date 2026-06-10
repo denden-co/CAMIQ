@@ -494,6 +494,16 @@ export function generateStrategy(
 
 export interface LLMProvidersResponse {
   providers: string[];
+  catalogue: ProviderInfo[];
+}
+
+/** One entry in the full provider catalogue (configured or not). */
+export interface ProviderInfo {
+  name: string;
+  label: string;
+  default_model: string | null;
+  env_key: string;
+  configured: boolean;
 }
 
 export function getLLMProviders(): Promise<LLMProvidersResponse> {

@@ -145,6 +145,11 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
 ### Session notes
 
 - GitHub repo: https://github.com/denden-co/CAMIQ
+- **Session 2026-06-10b (full LLM provider catalogue):**
+  - `/api/llm/providers` now returns a `catalogue` of ALL supported providers (configured flag, default model, env key) alongside the legacy `providers` list.
+  - New `huggingface` provider in llm.py registry (HF Inference router, OpenAI-compatible, env `HF_TOKEN`, default `meta-llama/Llama-3.3-70B-Instruct`) — covers Meta Llama models.
+  - `components/provider-picker.tsx` — shared provider + model-override fields used by Personas and Strategy. Unconfigured providers visible but disabled with the env key that enables them.
+  - Both generate calls now pass `model` override (backend already supported it).
 - **Session 2026-06-10 (professional-polish pass):**
   - **Repo restructure:** scratch files moved out of root — plans/audits → `docs/`, old HTML previews → `docs/archive/`, helper scripts → `scripts/`, test CSVs → `samples/`. Root now: README, CLAUDE.md, api, frontend, shared, docs, samples, scripts.
   - **Legacy class rename (audit 3.3):** `btn-gradient` → `btn-primary`, `text-gradient` → Tailwind `text-accent`, `hero-mesh` → plain `bg-background`, `card-glass` → `card-surface`, `divider-gradient` → `divider`. Dead aliases and unused animations deleted from globals.css.
