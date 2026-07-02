@@ -170,3 +170,15 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
   - Made CountryPicker error state recoverable in-place (commit `7436d6d`) — adds `refetch()` to country-context, retry button to picker.
   - Memory note: the previous CLAUDE.md description of "indigo-violet gradient design system" was incorrect — the actual code had been refactored to clean monochrome + indigo accent. This file now reflects reality.
 - New files in repo: `FRONTEND_AUDIT_2026-04-29.md`, `FRONTEND_IMPROVEMENT_PLAN.md`, `multi-lang-test.csv`, `start-dev-backend.command`, plus stub pages `/about /blog /changelog /contact /legal/{cookies,privacy,security,terms} /status`.
+
+## gstack (loop engineering)
+
+gstack skills are installed at `.claude/skills/gstack` (from https://github.com/garrytan/gstack).
+
+**In Claude Code:** use these slash commands. Prefer the /browse skill from gstack for web browsing; do not use `mcp__claude-in-chrome__*` tools there. Available skills: /office-hours, /plan-ceo-review, /plan-eng-review, /plan-design-review, /design-consultation, /review, /ship, /land-and-deploy, /canary, /benchmark, /browse, /qa, /qa-only, /design-review, /setup-browser-cookies, /setup-deploy, /retro, /investigate, /document-release, /codex, /cso, /autoplan, /careful, /freeze, /guard, /unfreeze, /gstack-upgrade. If skills aren't working, run `cd .claude/skills/gstack && ./setup`.
+
+**In Cowork / Claude desktop:** gstack slash commands are not registered; follow the loop prompt in [`docs/LOOP_PROMPT.md`](./docs/LOOP_PROMPT.md) instead (Chrome MCP is fine there).
+
+**Verification loop convention:** for any "check the app works" request, follow `docs/LOOP_PROMPT.md` — goal → checks → fix → re-verify → report, max 2 iterations unless told otherwise.
+
+Note: `.claude/skills/gstack/gstack_temp/` (~98 MB leftover clone) should be deleted manually — safe to remove.
