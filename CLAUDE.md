@@ -134,6 +134,11 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
 
 ### Security log
 
+- **2026-07-02** — Cleared the GitHub Dependabot alerts (4 reported: 1 high, 2 moderate, 1 low):
+  - **npm (frontend):** `npm audit fix --legacy-peer-deps` resolved vite (high, GHSA-fx2h-pf6j-xcff + launch-editor GHSA-v6wh-96g9-6wx3), js-yaml (moderate, GHSA-h67p-54hq-rp68), @babel/core (low, GHSA-4x5r-pxfx-6jf8). `npm audit` now 0 vulnerabilities.
+  - **pip (api venv):** upgraded fastapi→0.139.0 (pulls starlette 1.3.1, fixes PYSEC-2026-161/248/249, CVE-2026-48817/48818), python-multipart→0.0.32 (CVE-2026-40347/42561/53538–53540), pyjwt→2.13.0, pydantic-settings→2.14.2, urllib3→2.7.0, cryptography→49.0.0, idna→3.18. Security floors added to `api/requirements.txt`.
+  - **Accepted risks (no fixed release yet):** nltk 3.9.4 (PYSEC-2026-597) and torch 2.11.0 (CVE-2025-3000) — both in the heavy-ML dependency chain, not used in v0 request paths. Re-check next session.
+  - Verified: `tsc --noEmit` clean, API restarts and serves `/api/countries` + `/api/analyze`, dashboard renders end-to-end.
 - **2026-04-29** — Resolved 3 moderate npm advisories (commit `b9d2c96`):
   - `postcss` → `^8.5.12` (GHSA-qx2v-qp2m-jg93, XSS via unescaped `</style>`)
   - `next-intl` → `^4.11.0` (GHSA-8f24-v5vv-gm5j, open redirect)
