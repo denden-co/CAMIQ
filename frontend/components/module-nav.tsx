@@ -34,7 +34,7 @@ export function ModuleNav() {
             key={mod.href}
             href={mod.href}
             aria-current={current ? "page" : undefined}
-            className={`rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors ${
+            className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors ${
               current
                 ? "bg-muted text-foreground"
                 : "text-muted-foreground hover:text-foreground"

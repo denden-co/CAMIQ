@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   AlertOctagon,
   AlertTriangle,
@@ -143,6 +144,20 @@ export default function BiasAuditPage() {
           )}
         </Button>
       </div>
+
+      {!analysesLoading && analyses.length === 0 && (
+        <div className="mt-6 rounded-xl border border-dashed border-border bg-muted/20 p-10 text-center text-sm text-muted-foreground">
+          No saved analyses yet. Run a batch or CSV on the{" "}
+          <Link
+            href="/analyze"
+            className="font-medium text-primary hover:underline"
+          >
+            Analyse page
+          </Link>{" "}
+          and hit <span className="font-medium">Save analysis</span> — then
+          audit it here.
+        </div>
+      )}
 
       {error && (
         <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
