@@ -141,6 +141,24 @@ export async function analyzeBatch(
   return (await res.json()) as BatchAnalyzeResponse;
 }
 
+// ── Health ──────────────────────────────────────────────────────
+
+export interface HealthResponse {
+  status: string;
+  version: string;
+  sentiment_model: string;
+  /** Truthful backend state. `degraded` means a weaker fallback is live. */
+  sentiment: { model: string; degraded: boolean; reason: string | null };
+  topics: { available: boolean; backend: string | null; degraded: boolean };
+  degraded: boolean;
+  llm_providers: string[];
+}
+
+/** Backend capability report. Note: /health is NOT under /api. */
+export function getHealth(): Promise<HealthResponse> {
+  return get<HealthResponse>("/health");
+}
+
 export function listCountries(): Promise<CountrySummary[]> {
   return get<CountrySummary[]>("/api/countries");
 }

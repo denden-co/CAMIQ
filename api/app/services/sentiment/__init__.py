@@ -87,13 +87,30 @@ def _get_vader() -> SentimentIntensityAnalyzer:
     return SentimentIntensityAnalyzer()
 
 
-@lru_cache(maxsize=1)
-def _get_xlmr() -> Any | None:
-    """Try to load XLM-RoBERTa. Return None if unavailable.
+# Load state for XLM-RoBERTa. We deliberately do NOT wrap the loader in
+# lru_cache: a cached ``None`` would hide a transient failure (missing
+# sentencepiece, no network, wrong venv) for the life of the process.
+# Instead we remember the last error and retry on the next call, and we
+# surface the state through ``sentiment_status()`` so /health and the UI
+# can tell the truth about which backend is live.
+_xlmr_backend: dict[str, Any] | None = None
+_xlmr_error: str | None = None
+_xlmr_unavailable: bool = False  # True when transformers/torch not installed
 
-    We import inside the function so a slim install (no torch/transformers)
-    still boots the API cleanly.
+
+def _get_xlmr() -> dict[str, Any] | None:
+    """Return the loaded XLM-RoBERTa backend, loading it on first use.
+
+    Returns ``None`` when the ML stack is not installed (slim deploy) or the
+    model failed to load. The failure reason is kept in ``_xlmr_error``.
     """
+    global _xlmr_backend, _xlmr_error, _xlmr_unavailable
+
+    if _xlmr_backend is not None:
+        return _xlmr_backend
+    if _xlmr_unavailable:
+        return None
+
     try:
         import torch  # noqa: F401
         from transformers import (  # type: ignore
@@ -101,7 +118,9 @@ def _get_xlmr() -> Any | None:
             AutoTokenizer,
         )
     except ImportError:
-        log.info("transformers/torch not installed — falling back to VADER")
+        _xlmr_unavailable = True
+        _xlmr_error = "transformers/torch not installed (slim deployment)"
+        log.info("%s — using VADER", _xlmr_error)
         return None
 
     try:
@@ -109,10 +128,29 @@ def _get_xlmr() -> Any | None:
         tokenizer = AutoTokenizer.from_pretrained(_XLMR_MODEL_ID)
         model = AutoModelForSequenceClassification.from_pretrained(_XLMR_MODEL_ID)
         model.eval()
-        return {"tokenizer": tokenizer, "model": model, "torch": __import__("torch")}
+        _xlmr_backend = {"tokenizer": tokenizer, "model": model, "torch": __import__("torch")}
+        _xlmr_error = None
+        return _xlmr_backend
     except Exception as exc:  # noqa: BLE001
+        # Remember the error but do not cache the failure permanently —
+        # the next request retries, so a fixed environment recovers.
+        _xlmr_error = f"{type(exc).__name__}: {exc}"
         log.warning("Failed to load XLM-RoBERTa (%s) — falling back to VADER", exc)
         return None
+
+
+def sentiment_status() -> dict[str, Any]:
+    """Truthful backend status for /health.
+
+    ``degraded`` is True whenever requests are being served by VADER instead
+    of the transformer model — the UI shows a banner in that case.
+    """
+    backend = _get_xlmr()
+    return {
+        "model": _XLMR_MODEL_ID if backend is not None else "vader-lexicon-3.3.2",
+        "degraded": backend is None,
+        "reason": None if backend is not None else _xlmr_error,
+    }
 
 
 def active_model_name() -> str:

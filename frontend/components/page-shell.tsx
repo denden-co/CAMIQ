@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft, type LucideIcon } from "lucide-react";
 import { ModuleNav, PaletteButton } from "@/components/module-nav";
+import { StatusBanner } from "@/components/status-banner";
 
 interface PageShellProps {
   title: string;
@@ -51,6 +52,8 @@ export function PageShell({
           </div>
         </div>
       </header>
+
+      <StatusBanner />
 
       {/* ── Page header ─────────────────────────────── */}
       <section className="border-b border-border bg-background">

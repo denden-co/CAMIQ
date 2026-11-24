@@ -11,7 +11,8 @@ load_dotenv()  # Load .env before anything reads os.getenv
 
 from app.routers import analyses, analyze, bias, countries, personas, strategy, topics
 from app.services.llm import available_providers, provider_catalogue
-from app.services.sentiment import active_model_name
+from app.services.sentiment import active_model_name, sentiment_status
+from app.services.topics import topics_status
 
 app = FastAPI(
     title="CampaignIQ API",
@@ -64,9 +65,20 @@ async def llm_providers():
 
 @app.get("/health")
 async def health_check():
+    """Liveness + truthful capability report.
+
+    ``degraded`` is True when any module is running on a weaker fallback
+    (VADER instead of XLM-RoBERTa, TF-IDF instead of BERTopic). The UI
+    shows a banner so users are never silently given lower-quality results.
+    """
+    sentiment = sentiment_status()
+    topics = topics_status()
     return {
         "status": "ok",
         "version": "0.1.0",
         "sentiment_model": active_model_name(),
+        "sentiment": sentiment,
+        "topics": topics,
+        "degraded": sentiment["degraded"] or topics["degraded"],
         "llm_providers": available_providers(),
     }

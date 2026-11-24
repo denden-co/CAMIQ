@@ -234,6 +234,26 @@ def _topic_label_from_keywords(keywords: list[str], max_terms: int = 3) -> str:
     return ", ".join(keywords[:max_terms])
 
 
+def topics_status() -> dict:
+    """Which topic backends can actually run in this deployment."""
+    try:
+        import sklearn  # noqa: F401
+        fallback_ok = True
+    except ImportError:
+        fallback_ok = False
+    try:
+        import bertopic  # noqa: F401
+        import sentence_transformers  # noqa: F401
+        bertopic_ok = True
+    except ImportError:
+        bertopic_ok = False
+    return {
+        "available": fallback_ok or bertopic_ok,
+        "backend": "bertopic" if bertopic_ok else ("tfidf-kmeans" if fallback_ok else None),
+        "degraded": not bertopic_ok,
+    }
+
+
 def extract_topics(
     analysis_id: str,
     texts: list[str],
