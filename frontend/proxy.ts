@@ -1,18 +1,21 @@
-import { NextResponse, type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
-// DEV-ONLY mock auth — bypasses Supabase.
-// Swap back to the Supabase proxy helper (lib/supabase/middleware.ts)
-// when you're ready to wire real auth again.
-export function proxy(request: NextRequest) {
-  const isAuthed = request.cookies.get("campaigniq_dev_auth")?.value === "1";
-
-  if (!isAuthed && request.nextUrl.pathname.startsWith("/dashboard")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+/**
+ * Refreshes the Supabase session cookie on every request and redirects
+ * signed-out visitors away from the app pages. The dev-mock cookie is gone.
+ */
+export async function proxy(request: NextRequest) {
+  const hasSupabase =
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!hasSupabase) {
+    // Not configured (e.g. a preview build): the app pages still load but
+    // every API call fails with 401, which the UI reports as "sign in".
+    return NextResponse.next();
   }
-
-  return NextResponse.next();
+  return updateSession(request);
 }
 
 export const config = {

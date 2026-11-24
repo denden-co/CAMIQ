@@ -20,13 +20,14 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci --legacy-peer-deps
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npx vitest run
-      # Must pass with NO env vars: a clean checkout has to build.
+      # Build first: it generates the typed-route declarations that
+      # typecheck needs. Must pass with NO env vars (clean checkout).
       - run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npx vitest run
       - run: npm audit --audit-level=high
 
   api:

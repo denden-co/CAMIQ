@@ -32,8 +32,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /dashboard routes
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  // Pages that need an account. Everything else (landing, login, legal) is public.
+  const protectedPrefixes = ["/dashboard", "/analyze", "/personas", "/strategy", "/bias", "/countries"];
+  const needsAuth = protectedPrefixes.some((p) => request.nextUrl.pathname.startsWith(p));
+  if (!user && needsAuth) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

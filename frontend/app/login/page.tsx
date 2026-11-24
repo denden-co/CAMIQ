@@ -2,28 +2,41 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    try {
-      localStorage.setItem(
-        "campaigniq_dev_user",
-        JSON.stringify({ email, fullName: email.split("@")[0] })
-      );
-    } catch {
-      /* ignore */
+    setError(null);
+    if (!isSupabaseConfigured()) {
+      setError("Sign-in is not configured on this deployment.");
+      return;
     }
-    document.cookie =
-      "campaigniq_dev_auth=1; path=/; max-age=86400; samesite=lax";
-    window.location.assign("/dashboard");
+    setLoading(true);
+    // Created lazily so the page can prerender without Supabase env vars.
+    const supabase = createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    setLoading(false);
+    if (signInError) {
+      // Same message for wrong email and wrong password: do not reveal
+      // which accounts exist.
+      setError("Email or password is incorrect.");
+      return;
+    }
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -49,9 +62,9 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="mt-4 rounded-lg bg-amber-50 border border-amber-200/60 px-3 py-2 text-center text-xs text-amber-700">
-            Dev mode — any email & password works
-          </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Access is by invitation. Use the link in your invite email to set a password.
+          </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
@@ -89,6 +102,12 @@ export default function LoginPage() {
               />
             </div>
 
+            {error && (
+              <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                {error}
+              </p>
+            )}
+
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -101,9 +120,13 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
+        <p className="mt-6 flex items-center justify-center gap-4 text-center text-xs text-muted-foreground">
+          <Link href="/auth/reset-password" className="hover:text-foreground transition">
+            Forgot password?
+          </Link>
+          <span aria-hidden>·</span>
           <Link href="/" className="hover:text-foreground transition">
-            ← Back to home
+            Back to home
           </Link>
         </p>
       </div>
