@@ -48,7 +48,7 @@ Derived from doctoral thesis: "Analyzing Twitter/X Sentiment and Topic Signals f
 
 ## Local paths
 
-- **Mac path:** `~/Desktop/Cam/CAMIQ`
+- **Mac path:** `~/Projects/CAMIQ` (moved out of iCloud on 2026-11-24 — never keep this repo in an iCloud/Dropbox-synced folder; it evicted 323 files and corrupted `.git` with conflict copies)
 - **Git remote:** `origin https://github.com/denden-co/CAMIQ.git` (HTTPS)
 - **Branch:** `main`
 - **Last pushed commit:** `7436d6d` (CountryPicker retry button) — pushed 2026-04-29
@@ -109,10 +109,10 @@ Headlines: `letter-spacing: 0` (was `-0.03em`). Inter is optically tight enough.
 
 ```bash
 # Frontend (kill any running first if needed):
-cd ~/Desktop/Cam/CAMIQ/frontend && npm run dev      # :3000
+cd ~/Projects/CAMIQ/frontend && npm run dev      # :3000
 
 # Backend (FastAPI):
-cd ~/Desktop/Cam/CAMIQ/api && source .venv/bin/activate && \
+cd ~/Projects/CAMIQ/api && source .venv/bin/activate && \
   uvicorn main:app --host 127.0.0.1 --port 8000      # :8000
 ```
 
@@ -148,6 +148,8 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
   - Pre-existing: ESLint 8.57.1 ↔ eslint-config-next 16 peer-dep mismatch — `npm install` needs `--legacy-peer-deps`. Worth a future cleanup (Audit Priority 3.5).
 
 ### Session notes
+
+- **Session 2026-11-24 (health review fixes):** repo moved to `~/Projects/CAMIQ`; clean-checkout build fixed (Supabase client optional); `/health` now reports `sentiment`/`topics`/`degraded` truthfully and the UI shows a reduced-accuracy banner; scikit-learn in slim requirements so topics work on Render; batch caps (5,000 chars/item, 1M/request) + `run_in_threadpool` for inference; LLM calls 45 s timeout + 1 retry, 503 on provider outage; npm audit 0 (Next 16.4.6); `api/requirements.lock.txt` pinned; 18 pytest + 4 vitest tests; GitHub Actions CI at `.github/workflows/ci.yml`. **Still open:** Phase 8 real auth — the `X-User-Email` header is trusted as identity, so saved analyses are not protected until Supabase JWT verification lands.
 
 - GitHub repo: https://github.com/denden-co/CAMIQ
 - **Session 2026-06-10b (full LLM provider catalogue):**

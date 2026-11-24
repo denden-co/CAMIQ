@@ -45,3 +45,7 @@ api/models/weights/
 
 # gstack — kept local, not shared with collaborators
 .claude/
+
+# Test caches
+.pytest_cache/
+api/.venv-lock/
