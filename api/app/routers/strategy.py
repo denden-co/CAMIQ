@@ -1,7 +1,8 @@
 """AI Strategic Advisor router (Phase 4)."""
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth import CurrentUser, current_user
 from app.schemas.strategy import StrategyRequest, StrategyResponse
 from app.services import analyses_store
 from app.services.llm import LLMProviderError
@@ -9,11 +10,6 @@ from app.services.strategy import generate_strategy
 
 router = APIRouter()
 
-
-def _require_user(x_user_email: str | None) -> str:
-    if not x_user_email:
-        raise HTTPException(status_code=401, detail="Missing X-User-Email header.")
-    return x_user_email
 
 
 @router.post(
@@ -23,7 +19,7 @@ def _require_user(x_user_email: str | None) -> str:
 async def strategy_for_analysis(
     analysis_id: str,
     payload: StrategyRequest | None = None,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
+    user: CurrentUser = Depends(current_user),
 ) -> StrategyResponse:
     """Generate campaign strategy recommendations from a saved analysis.
 
@@ -31,8 +27,7 @@ async def strategy_for_analysis(
     covering messaging, targeting, risk mitigation, and resource
     allocation. Requires at least one LLM provider API key.
     """
-    user_email = _require_user(x_user_email)
-    saved = analyses_store.get_analysis(user_email, analysis_id)
+    saved = analyses_store.get_analysis(user.id, analysis_id)
     if saved is None:
         raise HTTPException(status_code=404, detail="Analysis not found.")
 
