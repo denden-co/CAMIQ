@@ -23,7 +23,7 @@ The repo includes `api/render.yaml`. New → Blueprint → point at the repo, th
 
 ### Memory note
 
-The slim build (`requirements.txt`) runs VADER and fits the smallest instances.
+The slim build (`requirements.lock.txt`, pinned from `requirements.txt`) runs VADER and the TF-IDF topic fallback, and fits the smallest instances.
 For full XLM-RoBERTa + BERTopic, the build must also install
 `requirements-ml.txt` and the instance needs **2 GB+ RAM**. Start slim,
 upgrade once traffic justifies it.
