@@ -13,6 +13,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { Button } from "@/components/ui/button";
 import { CountryPicker } from "@/components/country-picker";
 import { useCountry } from "@/lib/country-context";
@@ -131,7 +132,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background pb-24 md:pb-0">
       {/* ── Nav bar ───────────────────────────────── */}
       <header className="nav-bar sticky top-0 z-40">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8 sm:py-4">
@@ -305,6 +306,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      <MobileTabBar />
     </main>
   );
 }

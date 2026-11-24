@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, type LucideIcon } from "lucide-react";
 import { ModuleNav, PaletteButton } from "@/components/module-nav";
 import { StatusBanner } from "@/components/status-banner";
+import { MobileTabBar } from "@/components/mobile-tab-bar";
 
 interface PageShellProps {
   title: string;
@@ -77,9 +78,11 @@ export function PageShell({
       </section>
 
       {/* ── Content ─────────────────────────────────── */}
-      <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+      <div className="mx-auto max-w-6xl px-5 py-8 pb-24 sm:px-8 sm:py-10 md:pb-10">
         {children}
       </div>
+
+      <MobileTabBar />
     </main>
   );
 }

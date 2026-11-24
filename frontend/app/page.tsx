@@ -137,13 +137,14 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <span>Free for researchers</span>
-              <span className="text-border">·</span>
-              <span>GDPR-ready</span>
-              <span className="text-border">·</span>
-              <span>100+ languages</span>
-            </div>
+            <ul className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              {/* Dots only show from sm up; on phones the items wrap whole with a gap. */}
+              <li className="whitespace-nowrap">Free for researchers</li>
+              <li aria-hidden className="hidden text-border sm:inline">·</li>
+              <li className="whitespace-nowrap">GDPR-ready</li>
+              <li aria-hidden className="hidden text-border sm:inline">·</li>
+              <li className="whitespace-nowrap">100+ languages</li>
+            </ul>
           </div>
 
           {/* Product preview card */}
