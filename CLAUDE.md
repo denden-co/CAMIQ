@@ -98,8 +98,8 @@ Headlines: `letter-spacing: 0` (was `-0.03em`). Inter is optically tight enough.
 
 ### Current state
 
-- Dev-mode auth via localStorage mock + `campaigniq_dev_auth` cookie. Login form at `/login` accepts any email + password.
-- `/` redirects signed-in users (cookie present) to `/dashboard`; otherwise renders the marketing landing page.
+- **Auth is real (Phase 8, 2026-11-24):** Supabase email/password, invite-only. `/login` → `signInWithPassword`; `proxy.ts` → `updateSession()` guards all app pages; API requires `Authorization: Bearer <access_token>` (`api/app/auth.py`, `current_user`). The dev mock is gone. Tests use `CAMIQ_AUTH=fake` + `CAMIQ_STORE=file`.
+- `/` redirects signed-in users (Supabase session) to `/dashboard`; otherwise renders the marketing landing page.
 - Frontend: localhost:3000, API: localhost:8000
 - All 6 modules live and tested. Module page headers use lucide icons (`BarChart3`, `Users`, `Sparkles`, `Scale`, `Globe2`).
 - Dashboard module grid uses neutral cards (no rainbow gradients) with lucide icons + always-visible "Open module →" CTA.
@@ -121,7 +121,7 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
 ### Pending (next phases)
 
 - **Phase 7** — Deployment: Vercel (frontend) + Railway/Render (API)
-- **Phase 8** — Supabase auth integration (replace dev mock + cookie). `/` redirect already accepts a Supabase session cookie — just add a second check alongside `campaigniq_dev_auth`.
+- ~~**Phase 8** — Supabase auth~~ ✅ shipped 2026-11-24 (branch `phase8-auth`): see spec `docs/superpowers/specs/2026-11-24-phase8-real-auth-design.md`.
 - **Phase 9** — Real-time data ingestion (Twitter/X API)
 - **Phase 10** — Additional ML models beyond XLM-RoBERTa
 
@@ -149,7 +149,7 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
 
 ### Session notes
 
-- **Session 2026-11-24 (health review fixes):** repo moved to `~/Projects/CAMIQ`; clean-checkout build fixed (Supabase client optional); `/health` now reports `sentiment`/`topics`/`degraded` truthfully and the UI shows a reduced-accuracy banner; scikit-learn in slim requirements so topics work on Render; batch caps (5,000 chars/item, 1M/request) + `run_in_threadpool` for inference; LLM calls 45 s timeout + 1 retry, 503 on provider outage; npm audit 0 (Next 16.4.6); `api/requirements.lock.txt` pinned; 18 pytest + 4 vitest tests; GitHub Actions CI at `.github/workflows/ci.yml`. **Still open:** Phase 8 real auth — the `X-User-Email` header is trusted as identity, so saved analyses are not protected until Supabase JWT verification lands.
+- **Session 2026-11-24 (health review fixes):** repo moved to `~/Projects/CAMIQ`; clean-checkout build fixed (Supabase client optional); `/health` now reports `sentiment`/`topics`/`degraded` truthfully and the UI shows a reduced-accuracy banner; scikit-learn in slim requirements so topics work on Render; batch caps (5,000 chars/item, 1M/request) + `run_in_threadpool` for inference; LLM calls 45 s timeout + 1 retry, 503 on provider outage; npm audit 0 (Next 16.4.6); `api/requirements.lock.txt` pinned; 18 pytest + 4 vitest tests; GitHub Actions CI at `.github/workflows/ci.yml`. Phase 8 real auth landed the same day: JWT-verified API, `public.analyses` table with RLS, invite-only accounts.
 
 - GitHub repo: https://github.com/denden-co/CAMIQ
 - **Session 2026-06-10b (full LLM provider catalogue):**
