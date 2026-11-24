@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +23,14 @@ export default function UpdatePasswordPage() {
       return;
     }
 
+    if (!isSupabaseConfigured()) {
+      setError("Password reset is not available: Supabase is not configured.");
+      return;
+    }
+
     setLoading(true);
+    // Created lazily so the page can prerender without Supabase env vars.
+    const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
 
