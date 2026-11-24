@@ -110,10 +110,11 @@ async function get<T>(path: string): Promise<T> {
 export async function analyzeText(text: string): Promise<AnalyzeResponse> {
   const res = await fetch(`${API_BASE}/api/analyze`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify({ text }),
   });
 
+  if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(
@@ -129,10 +130,11 @@ export async function analyzeBatch(
 ): Promise<BatchAnalyzeResponse> {
   const res = await fetch(`${API_BASE}/api/analyze/batch`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify({ texts }),
   });
 
+  if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(

@@ -30,8 +30,46 @@ class CurrentUser(BaseModel):
     email: str | None = None
 
 
+_PRODUCTION_MARKERS = ("RENDER", "RAILWAY_ENVIRONMENT", "VERCEL", "FLY_APP_NAME")
+
+
+def _on_production_host() -> bool:
+    return os.getenv("CAMIQ_ENV") == "production" or any(os.getenv(m) for m in _PRODUCTION_MARKERS)
+
+
 def _fake_mode() -> bool:
-    return os.getenv("CAMIQ_AUTH") == "fake" and not os.getenv("SUPABASE_URL")
+    """Test-only verifier. Needs BOTH test switches and no Supabase URL."""
+    return (
+        os.getenv("CAMIQ_AUTH") == "fake"
+        and os.getenv("CAMIQ_STORE") == "file"
+        and not os.getenv("SUPABASE_URL")
+    )
+
+
+def check_auth_config() -> None:
+    """Fail fast at start-up on a dangerous or incomplete configuration.
+
+    Called from main.py. Raises RuntimeError rather than letting the API
+    boot into a state where every request is a 401 (or, worse, where the
+    fake verifier is live on a public host).
+    """
+    if os.getenv("CAMIQ_AUTH") == "fake" or os.getenv("CAMIQ_STORE") == "file":
+        if _on_production_host():
+            raise RuntimeError(
+                "CAMIQ_AUTH=fake / CAMIQ_STORE=file are test switches and are "
+                "refused on a production host."
+            )
+        if _fake_mode():
+            log.warning(
+                "AUTH IS IN FAKE MODE: 'Bearer test-<uuid>' is accepted as any user. "
+                "Local development and tests only."
+            )
+            return
+    if not os.getenv("SUPABASE_URL") or not os.getenv("SUPABASE_SERVICE_ROLE_KEY"):
+        raise RuntimeError(
+            "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set for authentication "
+            "(or CAMIQ_AUTH=fake with CAMIQ_STORE=file for local tests)."
+        )
 
 
 @lru_cache(maxsize=1)
@@ -67,20 +105,33 @@ def _verify_fake(token: str) -> CurrentUser:
 
 def _verify_supabase(token: str) -> CurrentUser:
     try:
+        from supabase_auth.errors import AuthApiError  # type: ignore
+    except ImportError:  # pragma: no cover - older supabase-py
+        AuthApiError = ()  # type: ignore[assignment]
+    try:
         res = _supabase_admin().auth.get_user(token)
-    except Exception as exc:  # noqa: BLE001 — any auth error is a 401, not a 500
-        log.info("token rejected: %s", type(exc).__name__)
+    except AuthApiError as exc:  # Supabase looked at the token and said no
+        log.info("token rejected: %s", getattr(exc, "code", type(exc).__name__))
         raise _unauthorised("Invalid or expired token") from exc
+    except Exception as exc:  # noqa: BLE001 — outage / misconfig, NOT the user's fault
+        log.error("auth service unavailable: %s: %s", type(exc).__name__, exc)
+        raise HTTPException(
+            status_code=503, detail="Authentication service unavailable. Try again shortly."
+        ) from exc
     user = getattr(res, "user", None)
     if user is None or not getattr(user, "id", None):
         raise _unauthorised("Invalid or expired token")
     return CurrentUser(id=str(user.id), email=getattr(user, "email", None))
 
 
-async def current_user(
+def current_user(
     authorization: str | None = Header(None, alias="Authorization"),
 ) -> CurrentUser:
-    """FastAPI dependency: the verified caller, or 401."""
+    """FastAPI dependency: the verified caller, or 401.
+
+    Deliberately a plain ``def``: the Supabase round trip is blocking, and
+    FastAPI runs sync dependencies in its threadpool, off the event loop.
+    """
     if not authorization:
         raise _unauthorised("Missing bearer token")
     scheme, _, token = authorization.partition(" ")

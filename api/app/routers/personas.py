@@ -1,5 +1,6 @@
 """Voter Personas router (Phase 4)."""
 
+from fastapi.concurrency import run_in_threadpool
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import CurrentUser, current_user
@@ -27,7 +28,7 @@ async def personas_for_analysis(
     language distribution of the saved batch. Requires at least one LLM
     provider API key to be configured.
     """
-    saved = analyses_store.get_analysis(user.id, analysis_id)
+    saved = await run_in_threadpool(analyses_store.get_analysis, user.id, analysis_id)
     if saved is None:
         raise HTTPException(status_code=404, detail="Analysis not found.")
 

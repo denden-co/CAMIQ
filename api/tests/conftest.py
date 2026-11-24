@@ -56,7 +56,7 @@ TEXTS = [
 
 
 def save_payload(client, texts=TEXTS, name="fixture"):
-    batch = client.post("/api/analyze/batch", json={"texts": texts}).json()
+    batch = client.post("/api/analyze/batch", json={"texts": texts}, headers=auth_headers()).json()
     return {"name": name, "source": "paste", "batch": batch, "original_texts": texts}
 
 

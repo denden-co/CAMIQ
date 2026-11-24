@@ -27,7 +27,7 @@ async def topics_for_analysis(
     so this endpoint never re-runs the sentiment model — topics are layered
     on top of the existing batch result.
     """
-    saved = analyses_store.get_analysis(user.id, analysis_id)
+    saved = await run_in_threadpool(analyses_store.get_analysis, user.id, analysis_id)
     if saved is None:
         raise HTTPException(status_code=404, detail="Analysis not found.")
 

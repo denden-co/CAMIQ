@@ -215,6 +215,11 @@ class SupabaseBackend:
 
 def _select_backend() -> _Backend:
     if os.getenv("CAMIQ_STORE") == "file":
+        if os.getenv("SUPABASE_URL"):
+            raise RuntimeError(
+                "CAMIQ_STORE=file is a test switch and cannot be combined with "
+                "SUPABASE_URL — unset one of them."
+            )
         return FileBackend(_DATA_DIR)
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")

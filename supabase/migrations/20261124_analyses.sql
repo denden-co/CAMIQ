@@ -37,3 +37,9 @@ revoke all on public.analyses from anon;
 -- Trigger helpers should not be callable via /rest/v1/rpc.
 revoke execute on function public.handle_new_user() from anon, authenticated;
 revoke execute on function public.handle_updated_at() from anon, authenticated;
+
+-- Review follow-up: signed-in browsers must also go through the API (size
+-- caps, validation), never straight to the table. RLS stays as a second line.
+revoke all on public.analyses from authenticated;
+revoke execute on function public.handle_new_user() from public;
+revoke execute on function public.handle_updated_at() from public;

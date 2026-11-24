@@ -27,7 +27,7 @@ async def bias_audit_for_analysis(
     confidence parity (4/5ths rule), chi-square independence test, and
     corpus skew check.
     """
-    saved = analyses_store.get_analysis(user.id, analysis_id)
+    saved = await run_in_threadpool(analyses_store.get_analysis, user.id, analysis_id)
     if saved is None:
         raise HTTPException(status_code=404, detail="Analysis not found.")
 
