@@ -49,3 +49,6 @@ api/models/weights/
 # Test caches
 .pytest_cache/
 api/.venv-lock/
+
+# superpowers scratch
+.superpowers/
