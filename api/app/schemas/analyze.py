@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class AnalyzeRequest(BaseModel):
@@ -50,6 +50,15 @@ class AnalyzeResponse(BaseModel):
     character_count: int
 
 
+# Per-item cap for batch texts. A tweet is <= 280 chars; a long post or
+# speech excerpt fits in 5,000. Without this cap a single request could
+# carry 500 x 100,000 chars (~50 MB) and stall the server.
+BATCH_ITEM_MAX_CHARS = 5_000
+# Total characters across the whole batch (~1 MB) — a second guard so 500
+# items near the per-item cap cannot combine into a multi-MB payload.
+BATCH_TOTAL_MAX_CHARS = 1_000_000
+
+
 class BatchAnalyzeRequest(BaseModel):
     texts: list[str] = Field(
         ...,
@@ -57,9 +66,29 @@ class BatchAnalyzeRequest(BaseModel):
         max_length=500,
         description=(
             "List of texts to analyse in one call. Capped at 500 per request "
-            "to keep XLM-RoBERTa inference times reasonable on CPU."
+            f"and {BATCH_ITEM_MAX_CHARS:,} characters per item to keep "
+            "XLM-RoBERTa inference times reasonable on CPU."
         ),
     )
+
+    @field_validator("texts")
+    @classmethod
+    def _cap_text_sizes(cls, texts: list[str]) -> list[str]:
+        """Reject oversized items early with a clear 422, not a hung server."""
+        total = 0
+        for i, t in enumerate(texts):
+            if len(t) > BATCH_ITEM_MAX_CHARS:
+                raise ValueError(
+                    f"texts[{i}] is {len(t):,} characters; the limit is "
+                    f"{BATCH_ITEM_MAX_CHARS:,} per item."
+                )
+            total += len(t)
+        if total > BATCH_TOTAL_MAX_CHARS:
+            raise ValueError(
+                f"Batch totals {total:,} characters; the limit is "
+                f"{BATCH_TOTAL_MAX_CHARS:,} per request."
+            )
+        return texts
 
 
 class BatchAggregate(BaseModel):

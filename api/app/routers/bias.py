@@ -1,5 +1,6 @@
 """Bias & Fairness audit router (Phase 4)."""
 
+from fastapi.concurrency import run_in_threadpool
 from fastapi import APIRouter, Header, HTTPException
 
 from app.schemas.bias import BiasAuditRequest, BiasAuditResponse
@@ -44,7 +45,8 @@ async def bias_audit_for_analysis(
 
     req = payload or BiasAuditRequest()
     try:
-        return run_bias_audit(
+        return await run_in_threadpool(
+            run_bias_audit,
             analysis_id=analysis_id,
             results=results,
             min_group_size=req.min_group_size,

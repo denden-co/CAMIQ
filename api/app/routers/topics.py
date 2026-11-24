@@ -1,5 +1,6 @@
 """Topic modelling router (Phase 3)."""
 
+from fastapi.concurrency import run_in_threadpool
 from fastapi import APIRouter, Header, HTTPException
 
 from app.schemas.topics import TopicModelRequest, TopicModelResponse
@@ -53,7 +54,9 @@ async def topics_for_analysis(
 
     req = payload or TopicModelRequest()
     try:
-        return extract_topics(
+        # Topic modelling is CPU-heavy — run off the event loop.
+        return await run_in_threadpool(
+            extract_topics,
             analysis_id=analysis_id,
             texts=texts,
             results=results,

@@ -257,6 +257,51 @@ async def chat(
 
 
 # ---------------------------------------------------------------------------
+# HTTP helper — timeout + one retry on transient failures
+# ---------------------------------------------------------------------------
+
+# 120 s per call meant a provider outage hung requests for two minutes.
+# 45 s is generous for a 2k-token completion; transient errors get one
+# retry with a short backoff, anything else surfaces immediately.
+LLM_TIMEOUT_SECONDS = 45
+_RETRYABLE_STATUS = {408, 409, 425, 429, 500, 502, 503, 504}
+
+
+class LLMProviderError(RuntimeError):
+    """Raised when a provider is unreachable or returns a non-2xx response."""
+
+
+async def _post_json(url: str, headers: dict[str, str], payload: dict) -> dict:
+    """POST JSON with a bounded timeout and a single retry."""
+    import asyncio
+
+    last_error: Exception | None = None
+    for attempt in range(2):
+        try:
+            async with httpx.AsyncClient(timeout=LLM_TIMEOUT_SECONDS) as client:
+                resp = await client.post(url, headers=headers, json=payload)
+            if resp.status_code in _RETRYABLE_STATUS and attempt == 0:
+                last_error = LLMProviderError(f"HTTP {resp.status_code} from provider")
+                await asyncio.sleep(1.5)
+                continue
+            resp.raise_for_status()
+            return resp.json()
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            last_error = exc
+            if attempt == 0:
+                await asyncio.sleep(1.5)
+                continue
+        except httpx.HTTPStatusError as exc:
+            raise LLMProviderError(
+                f"Provider returned HTTP {exc.response.status_code}: "
+                f"{exc.response.text[:200]}"
+            ) from exc
+    raise LLMProviderError(
+        f"LLM provider unavailable after retry: {last_error}"
+    ) from last_error
+
+
+# ---------------------------------------------------------------------------
 # OpenAI-compatible (OpenAI, Deepseek, Mistral, Cohere v2, custom)
 # ---------------------------------------------------------------------------
 
@@ -284,10 +329,7 @@ async def _chat_openai(
         "max_tokens": max_tokens,
     }
 
-    async with httpx.AsyncClient(timeout=120) as client:
-        resp = await client.post(url, headers=headers, json=payload)
-        resp.raise_for_status()
-        data = resp.json()
+    data = await _post_json(url, headers, payload)
 
     usage = data.get("usage", {})
     return LLMResponse(
@@ -325,10 +367,7 @@ async def _chat_google(
         },
     }
 
-    async with httpx.AsyncClient(timeout=120) as client:
-        resp = await client.post(url, json=payload)
-        resp.raise_for_status()
-        data = resp.json()
+    data = await _post_json(url, {"Content-Type": "application/json"}, payload)
 
     text = data["candidates"][0]["content"]["parts"][0]["text"]
     usage_meta = data.get("usageMetadata", {})
@@ -371,10 +410,7 @@ async def _chat_anthropic(
         "max_tokens": max_tokens,
     }
 
-    async with httpx.AsyncClient(timeout=120) as client:
-        resp = await client.post(url, headers=headers, json=payload)
-        resp.raise_for_status()
-        data = resp.json()
+    data = await _post_json(url, headers, payload)
 
     text = data["content"][0]["text"]
     usage = data.get("usage", {})

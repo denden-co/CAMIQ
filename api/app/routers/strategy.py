@@ -4,6 +4,7 @@ from fastapi import APIRouter, Header, HTTPException
 
 from app.schemas.strategy import StrategyRequest, StrategyResponse
 from app.services import analyses_store
+from app.services.llm import LLMProviderError
 from app.services.strategy import generate_strategy
 
 router = APIRouter()
@@ -51,6 +52,9 @@ async def strategy_for_analysis(
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LLMProviderError as exc:
+        # Upstream outage or rate limit — tell the client it is temporary.
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=500,

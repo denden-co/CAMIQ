@@ -1,5 +1,6 @@
 """Single-text and batch text analysis routers."""
 
+from fastapi.concurrency import run_in_threadpool
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.analyze import (
@@ -26,7 +27,9 @@ async def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
         raise HTTPException(status_code=400, detail="Text is empty.")
 
     try:
-        return analyze_text(text)
+        # CPU-bound model inference: keep it off the event loop so one
+        # slow request cannot freeze /health and every other caller.
+        return await run_in_threadpool(analyze_text, text)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=500,
@@ -52,7 +55,7 @@ async def analyze_batch_route(
         )
 
     try:
-        return analyze_batch(cleaned)
+        return await run_in_threadpool(analyze_batch, cleaned)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=500,

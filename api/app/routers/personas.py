@@ -4,6 +4,7 @@ from fastapi import APIRouter, Header, HTTPException
 
 from app.schemas.personas import PersonaRequest, PersonasResponse
 from app.services import analyses_store
+from app.services.llm import LLMProviderError
 from app.services.personas import generate_personas
 
 router = APIRouter()
@@ -52,6 +53,9 @@ async def personas_for_analysis(
     except ValueError as exc:
         # Typically "no LLM provider configured"
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LLMProviderError as exc:
+        # Upstream outage or rate limit — tell the client it is temporary.
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=500,
