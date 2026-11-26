@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,21 @@ export default function UpdatePasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const supabase = createClient();
+    let cancelled = false;
+    // The callback route has already exchanged the link's code for a cookie;
+    // confirm the session is readable here before letting them submit.
+    supabase.auth.getSession().then(({ data }) => {
+      if (!cancelled) setHasSession(Boolean(data.session));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -97,7 +112,7 @@ export default function UpdatePasswordPage() {
             </p>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading || hasSession !== true}>
             {loading ? "Please wait…" : "Update password"}
           </Button>
         </form>

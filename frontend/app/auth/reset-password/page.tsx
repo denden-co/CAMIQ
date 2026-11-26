@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -10,6 +10,14 @@ export default function ResetPasswordPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Arrived here from a link that was expired or already used.
+    if (new URLSearchParams(window.location.search).get("error") === "link") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot read of the URL after hydration
+      setError("That link has expired or was already used. Request a new one below.");
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -22,7 +30,7 @@ export default function ResetPasswordPage() {
     const supabase = createClient();
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
-      { redirectTo: `${window.location.origin}/auth/update-password` }
+      { redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password` }
     );
     setLoading(false);
     if (resetError) {
