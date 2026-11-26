@@ -116,7 +116,7 @@ All rights reserved. This software is proprietary.
 Three things trip up a fresh clone:
 
 1. `cd frontend && npm install --legacy-peer-deps` — plain `npm install` fails on a peer-dependency mismatch.
-2. The frontend builds **without** Supabase env vars. Real login (Phase 8) needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `frontend/.env.local`.
+2. The frontend builds **without** Supabase env vars, but signing in needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `frontend/.env.local`, and the API needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `api/.env`. Accounts are invite-only (see `docs/DEPLOYMENT.md` §4). For offline hacking without Supabase: `CAMIQ_STORE=file CAMIQ_AUTH=fake uvicorn main:app` and send `Authorization: Bearer test-<any uuid>`.
 3. Start the API from an **activated** venv (`cd api && source .venv/bin/activate && uvicorn main:app --port 8000`), then check `http://localhost:8000/health`. If `degraded` is `true`, the `reason` field says why (for example the ML stack is not installed).
 
 Run the checks locally before pushing — CI runs the same set:

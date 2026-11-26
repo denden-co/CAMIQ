@@ -10,7 +10,7 @@ import { PageShell } from "@/components/page-shell";
 import {
   analyzeBatch,
   analyzeText,
-  getDevUserEmail,
+  SessionExpiredError,
   saveAnalysis,
   type AnalysisSource,
   type AnalyzeResponse,
@@ -365,11 +365,6 @@ function BatchResults({
   async function handleSave() {
     setSaveError(null);
     setSaveMessage(null);
-    const email = getDevUserEmail();
-    if (!email) {
-      setSaveError("Not signed in — sign in first to save analyses.");
-      return;
-    }
     const name = window.prompt("Name this analysis:", defaultName)?.trim();
     if (!name) return;
     setSaving(true);
@@ -383,7 +378,11 @@ function BatchResults({
       });
       setSaveMessage(`Saved as "${saved.name}" — visible on your dashboard.`);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Save failed.");
+      if (err instanceof SessionExpiredError) {
+        setSaveError("Your session has expired — please sign in again to save.");
+      } else {
+        setSaveError(err instanceof Error ? err.message : "Save failed.");
+      }
     } finally {
       setSaving(false);
     }

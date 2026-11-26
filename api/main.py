@@ -9,6 +9,10 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Load .env before anything reads os.getenv
 
+from app.auth import check_auth_config
+
+check_auth_config()  # fail fast on a dangerous or incomplete auth setup
+
 from app.routers import analyses, analyze, bias, countries, personas, strategy, topics
 from app.services.llm import available_providers, provider_catalogue
 from app.services.sentiment import active_model_name, sentiment_status

@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CountryPicker } from "@/components/country-picker";
 import { useCountry } from "@/lib/country-context";
@@ -82,13 +83,22 @@ export default function DashboardPage() {
   const analysesLoading = !!user?.email && analyses === null && !analysesError;
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("campaigniq_dev_user");
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot read of the dev-auth localStorage store after hydration; lazy useState would mismatch SSR markup
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      /* ignore */
-    }
+    if (!isSupabaseConfigured()) return;
+    let cancelled = false;
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        const email = data.user?.email;
+        if (!cancelled && email) {
+          setUser({ email, fullName: email.split("@")[0] });
+        }
+      })
+      .catch(() => {
+        /* proxy already redirected signed-out users */
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -120,13 +130,10 @@ export default function DashboardPage() {
     }
   }
 
-  function handleSignOut() {
-    try {
-      localStorage.removeItem("campaigniq_dev_user");
-    } catch {
-      /* ignore */
+  async function handleSignOut() {
+    if (isSupabaseConfigured()) {
+      await createClient().auth.signOut();
     }
-    document.cookie = "campaigniq_dev_auth=; path=/; max-age=0; samesite=lax";
     router.push("/login");
     router.refresh();
   }

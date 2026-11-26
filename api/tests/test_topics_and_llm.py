@@ -2,10 +2,12 @@
 
 import pytest
 
+from conftest import auth_headers
+
 
 def test_topics_work_without_the_ml_stack(client, saved_analysis):
     """Regression: used to 500 with 'No module named sklearn' on slim deploys."""
-    headers = {"X-User-Email": "alice@example.com"}
+    headers = auth_headers()
     res = client.post(f"/api/analyses/{saved_analysis['id']}/topics", headers=headers)
     assert res.status_code == 200, res.text
     body = res.json()
@@ -16,7 +18,7 @@ def test_topics_work_without_the_ml_stack(client, saved_analysis):
 def test_personas_without_provider_key_gives_clear_422(client, saved_analysis, monkeypatch):
     for key in ("GOOGLE_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "HF_TOKEN"):
         monkeypatch.delenv(key, raising=False)
-    headers = {"X-User-Email": "alice@example.com"}
+    headers = auth_headers()
     res = client.post(f"/api/analyses/{saved_analysis['id']}/personas", headers=headers)
     assert res.status_code == 422
 

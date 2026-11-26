@@ -1,7 +1,11 @@
 """Saved analyses router (Phase 2 persistence)."""
 
-from fastapi import APIRouter, Header, HTTPException
+import logging
 
+from fastapi.concurrency import run_in_threadpool
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.auth import CurrentUser, current_user
 from app.schemas.analyses import (
     AnalysisSummary,
     SavedAnalysis,
@@ -9,60 +13,41 @@ from app.schemas.analyses import (
 )
 from app.services import analyses_store
 
+log = logging.getLogger(__name__)
+
 router = APIRouter()
 
-
-def _require_user(x_user_email: str | None) -> str:
-    """Dev-mock 'auth'.
-
-    Reads the user identifier from the X-User-Email header. When real
-    Supabase auth lands, this is replaced with a JWT-verified dependency
-    that returns auth.uid().
-    """
-    if not x_user_email:
-        raise HTTPException(
-            status_code=401,
-            detail="Missing X-User-Email header.",
-        )
-    return x_user_email
 
 
 @router.post("/analyses", response_model=SavedAnalysis, status_code=201)
 async def create_analysis(
     payload: SaveAnalysisRequest,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
+    user: CurrentUser = Depends(current_user),
 ) -> SavedAnalysis:
     """Persist a completed batch analysis so it shows up in Recent Analyses."""
-    user_email = _require_user(x_user_email)
-    # Trust the header over any user_email in the body — the client must
-    # not be able to save under someone else's name.
-    payload.user_email = user_email
 
     try:
-        return analyses_store.save_analysis(payload)
+        return await run_in_threadpool(analyses_store.save_analysis, payload, user.id)
     except Exception as exc:  # noqa: BLE001
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to save analysis: {exc}",
-        ) from exc
+        # Log the real error server-side; never echo database internals.
+        log.exception("save_analysis failed for user %s", user.id)
+        raise HTTPException(status_code=500, detail="Failed to save analysis.") from exc
 
 
 @router.get("/analyses", response_model=list[AnalysisSummary])
 async def list_analyses(
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
+    user: CurrentUser = Depends(current_user),
 ) -> list[AnalysisSummary]:
     """List Recent Analyses for the current user, newest first."""
-    user_email = _require_user(x_user_email)
-    return analyses_store.list_analyses(user_email)
+    return await run_in_threadpool(analyses_store.list_analyses, user.id)
 
 
 @router.get("/analyses/{analysis_id}", response_model=SavedAnalysis)
 async def get_analysis(
     analysis_id: str,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
+    user: CurrentUser = Depends(current_user),
 ) -> SavedAnalysis:
-    user_email = _require_user(x_user_email)
-    saved = analyses_store.get_analysis(user_email, analysis_id)
+    saved = await run_in_threadpool(analyses_store.get_analysis, user.id, analysis_id)
     if saved is None:
         raise HTTPException(status_code=404, detail="Analysis not found.")
     return saved
@@ -71,10 +56,9 @@ async def get_analysis(
 @router.delete("/analyses/{analysis_id}", status_code=204)
 async def delete_analysis(
     analysis_id: str,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
+    user: CurrentUser = Depends(current_user),
 ) -> None:
-    user_email = _require_user(x_user_email)
-    ok = analyses_store.delete_analysis(user_email, analysis_id)
+    ok = await run_in_threadpool(analyses_store.delete_analysis, user.id, analysis_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Analysis not found.")
     return None

@@ -1,7 +1,9 @@
 """Single-text and batch text analysis routers."""
 
 from fastapi.concurrency import run_in_threadpool
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.auth import CurrentUser, current_user
 
 from app.schemas.analyze import (
     AnalyzeRequest,
@@ -15,7 +17,10 @@ router = APIRouter()
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
-async def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
+async def analyze(
+    payload: AnalyzeRequest,
+    user: CurrentUser = Depends(current_user),
+) -> AnalyzeResponse:
     """Analyse a single piece of text for sentiment, language, and key phrases.
 
     Uses XLM-RoBERTa (multilingual) if `transformers` + `torch` are installed,
@@ -40,6 +45,7 @@ async def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
 @router.post("/analyze/batch", response_model=BatchAnalyzeResponse)
 async def analyze_batch_route(
     payload: BatchAnalyzeRequest,
+    user: CurrentUser = Depends(current_user),
 ) -> BatchAnalyzeResponse:
     """Analyse many texts at once and return per-text results + aggregates.
 

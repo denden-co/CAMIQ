@@ -1,19 +1,15 @@
 """Topic modelling router (Phase 3)."""
 
 from fastapi.concurrency import run_in_threadpool
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth import CurrentUser, current_user
 from app.schemas.topics import TopicModelRequest, TopicModelResponse
 from app.services import analyses_store
 from app.services.topics import extract_topics
 
 router = APIRouter()
 
-
-def _require_user(x_user_email: str | None) -> str:
-    if not x_user_email:
-        raise HTTPException(status_code=401, detail="Missing X-User-Email header.")
-    return x_user_email
 
 
 @router.post(
@@ -23,7 +19,7 @@ def _require_user(x_user_email: str | None) -> str:
 async def topics_for_analysis(
     analysis_id: str,
     payload: TopicModelRequest | None = None,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
+    user: CurrentUser = Depends(current_user),
 ) -> TopicModelResponse:
     """Run BERTopic on a saved analysis and return topics + sentiment lean.
 
@@ -31,8 +27,7 @@ async def topics_for_analysis(
     so this endpoint never re-runs the sentiment model — topics are layered
     on top of the existing batch result.
     """
-    user_email = _require_user(x_user_email)
-    saved = analyses_store.get_analysis(user_email, analysis_id)
+    saved = await run_in_threadpool(analyses_store.get_analysis, user.id, analysis_id)
     if saved is None:
         raise HTTPException(status_code=404, detail="Analysis not found.")
 

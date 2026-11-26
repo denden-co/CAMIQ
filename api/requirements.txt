@@ -21,5 +21,8 @@ vaderSentiment>=3.3.2
 scikit-learn>=1.4.0
 numpy>=1.26.0
 
+# Auth + persistence (Phase 8)
+supabase>=2.3.0
+
 # Utilities
 httpx>=0.27.0

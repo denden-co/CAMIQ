@@ -1,5 +1,7 @@
 // Tiny client for the CampaignIQ FastAPI backend.
 
+import { createClient, isSupabaseConfigured } from "./supabase/client";
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -108,10 +110,11 @@ async function get<T>(path: string): Promise<T> {
 export async function analyzeText(text: string): Promise<AnalyzeResponse> {
   const res = await fetch(`${API_BASE}/api/analyze`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify({ text }),
   });
 
+  if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(
@@ -127,10 +130,11 @@ export async function analyzeBatch(
 ): Promise<BatchAnalyzeResponse> {
   const res = await fetch(`${API_BASE}/api/analyze/batch`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify({ texts }),
   });
 
+  if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(
@@ -179,7 +183,6 @@ export interface SaveAnalysisRequest {
   source: AnalysisSource;
   original_texts: string[];
   batch: BatchAnalyzeResponse;
-  user_email: string;
 }
 
 export interface AnalysisSummary {
@@ -199,22 +202,30 @@ export interface SavedAnalysis extends AnalysisSummary {
   original_texts: string[];
 }
 
-/** Read the dev-mock user email from localStorage. */
-export function getDevUserEmail(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("campaigniq_dev_user");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { email?: string };
-    return parsed.email ?? null;
-  } catch {
-    return null;
+/** Thrown when the API rejects our token: the user must sign in again. */
+export class SessionExpiredError extends Error {
+  constructor(message = "Your session has expired. Please sign in again.") {
+    super(message);
+    this.name = "SessionExpiredError";
   }
 }
 
-function authHeader(): Record<string, string> {
-  const email = getDevUserEmail();
-  return email ? { "X-User-Email": email } : {};
+/**
+ * Bearer header carrying the current Supabase access token, or {} when
+ * nobody is signed in (or Supabase is not configured).
+ */
+export async function authHeader(): Promise<Record<string, string>> {
+  if (!isSupabaseConfigured()) return {};
+  try {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
 }
 
 async function authedJson<T>(
@@ -225,10 +236,13 @@ async function authedJson<T>(
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...authHeader(),
+      ...(await authHeader()),
       ...(init.headers ?? {}),
     },
   });
+  if (res.status === 401) {
+    throw new SessionExpiredError();
+  }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(
@@ -240,17 +254,11 @@ async function authedJson<T>(
 }
 
 export function saveAnalysis(
-  payload: Omit<SaveAnalysisRequest, "user_email">
+  payload: SaveAnalysisRequest
 ): Promise<SavedAnalysis> {
-  const email = getDevUserEmail();
-  if (!email) {
-    return Promise.reject(
-      new Error("Not signed in — can't save analyses.")
-    );
-  }
   return authedJson<SavedAnalysis>("/api/analyses", {
     method: "POST",
-    body: JSON.stringify({ ...payload, user_email: email }),
+    body: JSON.stringify(payload),
   });
 }
 

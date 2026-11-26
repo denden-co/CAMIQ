@@ -31,13 +31,6 @@ class SaveAnalysisRequest(BaseModel):
         description="Original input texts in the same order as batch.results.",
     )
     batch: BatchAnalyzeResponse
-    user_email: str = Field(
-        ...,
-        description=(
-            "Identifier for the dev-mock user. Replaced by auth.uid() when "
-            "real Supabase auth is wired back in."
-        ),
-    )
 
 
 class AnalysisSummary(BaseModel):

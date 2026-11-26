@@ -1,7 +1,9 @@
 """Voter Personas router (Phase 4)."""
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi.concurrency import run_in_threadpool
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth import CurrentUser, current_user
 from app.schemas.personas import PersonaRequest, PersonasResponse
 from app.services import analyses_store
 from app.services.llm import LLMProviderError
@@ -9,11 +11,6 @@ from app.services.personas import generate_personas
 
 router = APIRouter()
 
-
-def _require_user(x_user_email: str | None) -> str:
-    if not x_user_email:
-        raise HTTPException(status_code=401, detail="Missing X-User-Email header.")
-    return x_user_email
 
 
 @router.post(
@@ -23,7 +20,7 @@ def _require_user(x_user_email: str | None) -> str:
 async def personas_for_analysis(
     analysis_id: str,
     payload: PersonaRequest | None = None,
-    x_user_email: str | None = Header(None, alias="X-User-Email"),
+    user: CurrentUser = Depends(current_user),
 ) -> PersonasResponse:
     """Generate voter personas from a saved analysis using an LLM.
 
@@ -31,8 +28,7 @@ async def personas_for_analysis(
     language distribution of the saved batch. Requires at least one LLM
     provider API key to be configured.
     """
-    user_email = _require_user(x_user_email)
-    saved = analyses_store.get_analysis(user_email, analysis_id)
+    saved = await run_in_threadpool(analyses_store.get_analysis, user.id, analysis_id)
     if saved is None:
         raise HTTPException(status_code=404, detail="Analysis not found.")
 
