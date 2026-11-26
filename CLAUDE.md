@@ -4,7 +4,7 @@ Global political intelligence platform — sentiment analysis, text analysis, vo
 
 ## Tech stack
 
-- **Frontend:** Next.js 14+ (App Router, TypeScript, Tailwind CSS, shadcn/ui, next-intl, Recharts)
+- **Frontend:** Next.js 16 / React 19 (App Router, TypeScript, Tailwind CSS, shadcn/ui, next-intl, Recharts)
 - **Backend:** Python FastAPI
 - **ML/NLP:** XLM-RoBERTa (multilingual), BERTweet (English), VADER, TextBlob, SVM, Random Forest, XGBoost, CNN, LSTM, BERTopic, LDA, NMF, K-Means, DBSCAN, NER, TF-IDF, Word2Vec
 - **Database/Auth:** Supabase (PostgreSQL, Auth, Storage, RLS)
@@ -48,7 +48,7 @@ Derived from doctoral thesis: "Analyzing Twitter/X Sentiment and Topic Signals f
 
 ## Local paths
 
-- **Mac path:** `~/Projects/CAMIQ` (moved out of iCloud on 2026-11-24 — never keep this repo in an iCloud/Dropbox-synced folder; it evicted 323 files and corrupted `.git` with conflict copies)
+- **Mac path:** `~/Desktop/CAMIQ.nosync` — the `.nosync` suffix tells iCloud to leave this folder alone. Never rename it or move it into a synced folder: iCloud once evicted 323 files and corrupted `.git` with conflict copies.
 - **Git remote:** `origin https://github.com/denden-co/CAMIQ.git` (HTTPS)
 - **Branch:** `main`
 - **Last pushed commit:** `7436d6d` (CountryPicker retry button) — pushed 2026-04-29
@@ -59,7 +59,7 @@ Derived from doctoral thesis: "Analyzing Twitter/X Sentiment and Topic Signals f
   - `e3ee423` refactor(ui): remove all remaining emoji from module pages
   - `7436d6d` feat(country-picker): add retry on fetch failure
 
-## Build progress (as of 2026-04-29)
+## Build progress
 
 ### Completed phases
 
@@ -69,13 +69,13 @@ Derived from doctoral thesis: "Analyzing Twitter/X Sentiment and Topic Signals f
 4. **Phase 4** — Voter Personas (LLM-generated via multi-provider), AI Strategic Advisor (recommendations, risk factors, executive summary), Bias & Fairness Audit (4/5ths rule, chi-square independence, corpus skew, language group breakdown).
 5. **Phase 5** — Responsive design polish: Tailwind mobile-first breakpoints on all pages, shared Spinner component, loading states on all buttons/data fetches.
 6. **Phase 6** — Premium UI redesign (initially "indigo-violet gradient" per Quorum/Linear/Vercel, since refactored to clean monochrome — see Phase 6.5 below). Inter font, PageShell shared layout, premium data tables, refined form inputs.
-7. **Phase 6.5 (2026-04-29 cleanup)** — Refactored Phase 6 against [Frontend Prompt Instructions](./FRONTEND_AUDIT_2026-04-29.md) rubric. Monochrome ink + single indigo accent (no more dominant gradient palette). Lucide icons replace all emoji and geometric glyphs throughout the app. 8px corner radius on cards. Letter-spacing 0 (was -0.03em). Always-visible CTAs. `/` redirects signed-in users to `/dashboard`. CountryPicker has a retry button instead of stuck error state. Legacy class names (`btn-gradient`, `text-gradient`, `hero-mesh`, etc.) retained as aliases but now render flat/monochrome.
+7. **Phase 6.5 (2026-04-29 cleanup)** — Refactored Phase 6 against [Frontend Prompt Instructions](./docs/FRONTEND_AUDIT_2026-04-29.md) rubric. Monochrome ink + single indigo accent (no more dominant gradient palette). Lucide icons replace all emoji and geometric glyphs throughout the app. 8px corner radius on cards. Letter-spacing 0 (was -0.03em). Always-visible CTAs. `/` redirects signed-in users to `/dashboard`. CountryPicker has a retry button instead of stuck error state.
 
 ### Key UI components
 
 - `frontend/components/page-shell.tsx` — shared nav + page header. Accepts `Icon: LucideIcon` prop (renders in a 1px-bordered square). `← Dashboard` link uses lucide `ArrowLeft`.
 - `frontend/components/spinner.tsx` — animated SVG loading spinner
-- `frontend/components/ui/button.tsx` — `btn-gradient` (now solid ink), `accent`, `outline`, `ghost`, `secondary` variants
+- `frontend/components/ui/button.tsx` — `btn-primary` (solid ink), `accent`, `outline`, `ghost`, `secondary` variants
 - `frontend/components/country-picker.tsx` — country selector dropdown with retry button on fetch failure (lucide `RefreshCw`)
 - `frontend/components/csv-upload.tsx` — CSV file upload with column picker
 - `frontend/lib/country-context.tsx` — country list provider exposes `refetch()` for in-place retry
@@ -88,9 +88,9 @@ Icon convention: lucide-react throughout (no emoji or hand-drawn SVG except lang
 
 Colour tokens: `--background`, `--foreground` (ink), `--card`, `--primary` (ink for CTAs), `--accent` (indigo-500 for highlights and the secondary CTA), `--accent-soft` (`#EEF2FF`), `--muted`, `--border`, `--ring`, semantic `--success/--warning/--danger`.
 
-Legacy "gradient" class names retained as backwards-compat aliases — they all render flat: `.hero-mesh` = flat canvas, `.text-gradient` = solid indigo, `.btn-gradient` = solid ink, `.gradient-border` = 1px border, `.divider-gradient` = 1px line. Worth renaming in a future pass (see Frontend Audit doc Priority 3.3).
+Class names: `.btn-primary` (solid ink), Tailwind `text-accent` (solid indigo), `bg-background` (flat canvas), `.card-surface`, `.divider` (1px line). The old gradient names were removed.
 
-Other classes: `.input-refined`, `.table-premium`, `.stat-badge`, `.chip`, `.chip-accent`, `.nav-bar`, `.card-glass`, `.card-hover`, `.logomark`, `.dot`.
+Other classes: `.input-refined`, `.table-premium`, `.stat-badge`, `.chip`, `.chip-accent`, `.nav-bar`, `.card-hover`, `.logomark`, `.dot`.
 
 Custom shadows in tailwind.config.ts: `glow` and `glow-lg` (subtle ink ring), `soft`, `card`, `card-hover`. All shadows are now ink-based not colour-tinted.
 
@@ -109,10 +109,10 @@ Headlines: `letter-spacing: 0` (was `-0.03em`). Inter is optically tight enough.
 
 ```bash
 # Frontend (kill any running first if needed):
-cd ~/Projects/CAMIQ/frontend && npm run dev      # :3000
+cd ~/Desktop/CAMIQ.nosync/frontend && npm run dev      # :3000
 
 # Backend (FastAPI):
-cd ~/Projects/CAMIQ/api && source .venv/bin/activate && \
+cd ~/Desktop/CAMIQ.nosync/api && source .venv/bin/activate && \
   uvicorn main:app --host 127.0.0.1 --port 8000      # :8000
 ```
 
@@ -132,51 +132,10 @@ The dashboard's `CountryPicker` and `Recent Analyses` table both call the API. I
 - **Priority 2.2** — replace mock product preview on `/` with a live snapshot of an actual analysis
 - **Priority 3.1** — decide whether `/` should drop the marketing page entirely (Option B in audit)
 
-### Security log
+### History
 
-- **2026-07-02** — Cleared the GitHub Dependabot alerts (4 reported: 1 high, 2 moderate, 1 low):
-  - **npm (frontend):** `npm audit fix --legacy-peer-deps` resolved vite (high, GHSA-fx2h-pf6j-xcff + launch-editor GHSA-v6wh-96g9-6wx3), js-yaml (moderate, GHSA-h67p-54hq-rp68), @babel/core (low, GHSA-4x5r-pxfx-6jf8). `npm audit` now 0 vulnerabilities.
-  - **pip (api venv):** upgraded fastapi→0.139.0 (pulls starlette 1.3.1, fixes PYSEC-2026-161/248/249, CVE-2026-48817/48818), python-multipart→0.0.32 (CVE-2026-40347/42561/53538–53540), pyjwt→2.13.0, pydantic-settings→2.14.2, urllib3→2.7.0, cryptography→49.0.0, idna→3.18. Security floors added to `api/requirements.txt`.
-  - **Accepted risks (no fixed release yet):** nltk 3.9.4 (PYSEC-2026-597) and torch 2.11.0 (CVE-2025-3000) — both in the heavy-ML dependency chain, not used in v0 request paths. Re-check next session.
-  - Verified: `tsc --noEmit` clean, API restarts and serves `/api/countries` + `/api/analyze`, dashboard renders end-to-end.
-- **2026-04-29** — Resolved 3 moderate npm advisories (commit `b9d2c96`):
-  - `postcss` → `^8.5.12` (GHSA-qx2v-qp2m-jg93, XSS via unescaped `</style>`)
-  - `next-intl` → `^4.11.0` (GHSA-8f24-v5vv-gm5j, open redirect)
-  - `next` → `^16.2.4` (transitive postcss)
-  - Added `overrides.postcss = ^8.5.12` to force-resolve Next's bundled copy.
-  - Verified: `npm audit` reports 0 vulnerabilities; `tsc --noEmit` passes.
-  - Pre-existing: ESLint 8.57.1 ↔ eslint-config-next 16 peer-dep mismatch — `npm install` needs `--legacy-peer-deps`. Worth a future cleanup (Audit Priority 3.5).
-
-### Session notes
-
-- **Session 2026-11-24 (health review fixes):** repo moved to `~/Projects/CAMIQ`; clean-checkout build fixed (Supabase client optional); `/health` now reports `sentiment`/`topics`/`degraded` truthfully and the UI shows a reduced-accuracy banner; scikit-learn in slim requirements so topics work on Render; batch caps (5,000 chars/item, 1M/request) + `run_in_threadpool` for inference; LLM calls 45 s timeout + 1 retry, 503 on provider outage; npm audit 0 (Next 16.4.6); `api/requirements.lock.txt` pinned; 18 pytest + 4 vitest tests; GitHub Actions CI at `.github/workflows/ci.yml`. Phase 8 real auth landed the same day: JWT-verified API, `public.analyses` table with RLS, invite-only accounts.
-
-- GitHub repo: https://github.com/denden-co/CAMIQ
-- **Session 2026-06-10b (full LLM provider catalogue):**
-  - `/api/llm/providers` now returns a `catalogue` of ALL supported providers (configured flag, default model, env key) alongside the legacy `providers` list.
-  - New `huggingface` provider in llm.py registry (HF Inference router, OpenAI-compatible, env `HF_TOKEN`, default `meta-llama/Llama-3.3-70B-Instruct`) — covers Meta Llama models.
-  - `components/provider-picker.tsx` — shared provider + model-override fields used by Personas and Strategy. Unconfigured providers visible but disabled with the env key that enables them.
-  - Both generate calls now pass `model` override (backend already supported it).
-- **Session 2026-06-10 (professional-polish pass):**
-  - **Repo restructure:** scratch files moved out of root — plans/audits → `docs/`, old HTML previews → `docs/archive/`, helper scripts → `scripts/`, test CSVs → `samples/`. Root now: README, CLAUDE.md, api, frontend, shared, docs, samples, scripts.
-  - **Legacy class rename (audit 3.3):** `btn-gradient` → `btn-primary`, `text-gradient` → Tailwind `text-accent`, `hero-mesh` → plain `bg-background`, `card-glass` → `card-surface`, `divider-gradient` → `divider`. Dead aliases and unused animations deleted from globals.css.
-  - **ESLint 9 (audit 3.5):** flat config at `frontend/eslint.config.mjs` (FlatCompat + next/core-web-vitals). `next lint` is gone in Next 16, so `npm run lint` = `eslint .`. **Run `npm install --legacy-peer-deps` once to pull eslint 9 + @eslint/eslintrc.**
-  - **⌘K command palette (audit 2.3):** `components/command-palette.tsx`, dependency-free (no cmdk), mounted in root layout. ⌘K/Ctrl-K everywhere; buttons dispatch `camiq:open-palette`.
-  - **Module nav rail (audit 2.4):** `components/module-nav.tsx` — module links in PageShell top bar (hidden < md), current page highlighted, plus ⌘K trigger button.
-  - **Legal pages (audit 3.2):** real UK-GDPR-aware content for `/legal/{privacy,terms,cookies,security}` via shared `components/legal-page.tsx`. ⚠️ Drafted by AI — have a solicitor review before public launch.
-  - **Deployment prep (Phase 7):** CORS origins now read from `CORS_ORIGINS` env var (api/main.py); `api/.env.example`, `frontend/.env.example`, `api/Procfile`, `api/render.yaml`, and step-by-step [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md).
-  - **README** rewritten to match the shipped product (Next 16/React 19, accurate modules, new repo layout).
-  - Typed routes: new nav components use `Route` from "next" for href types.
-  - Verified: `tsc --noEmit` clean, `py_compile main.py` clean. `npm run lint`/`next build` still to be verified on the Mac after `npm install --legacy-peer-deps`.
-- **Session 2026-04-29:**
-  - Security patch (commit `b9d2c96`) + ~18 days of accumulated Phase 6 follow-up shipped.
-  - Wrote [`FRONTEND_AUDIT_2026-04-29.md`](./FRONTEND_AUDIT_2026-04-29.md) — full audit against the Frontend Prompt Instructions rubric (29 Apr 2026, e.dennis7@icloud.com → eveden02@icloud.com email).
-  - Shipped all 5 Priority-1 quick wins (commit `02842d7`): lucide icons, drop rainbow gradients, 8px corners, zero letter-spacing, always-visible CTAs.
-  - Added `/` → `/dashboard` redirect for signed-in users (commit `c530dc3`).
-  - Removed all remaining emoji from `/analyze`, `/personas`, `/strategy`, `/bias`, `/countries` headers and inline maps (commit `e3ee423`). PageShell prop renamed `icon: string` → `Icon: LucideIcon`.
-  - Made CountryPicker error state recoverable in-place (commit `7436d6d`) — adds `refetch()` to country-context, retry button to picker.
-  - Memory note: the previous CLAUDE.md description of "indigo-violet gradient design system" was incorrect — the actual code had been refactored to clean monochrome + indigo accent. This file now reflects reality.
-- New files in repo: `FRONTEND_AUDIT_2026-04-29.md`, `FRONTEND_IMPROVEMENT_PLAN.md`, `multi-lang-test.csv`, `start-dev-backend.command`, plus stub pages `/about /blog /changelog /contact /legal/{cookies,privacy,security,terms} /status`.
+Security fixes and per-session notes live in [`docs/SESSION_LOG.md`](./docs/SESSION_LOG.md).
+Open accepted risks: nltk 3.9.4 (PYSEC-2026-597) and torch 2.11.0 (CVE-2025-3000) — heavy-ML chain only, not in v0 request paths; re-check when fixes ship.
 
 ## gstack (loop engineering)
 
@@ -187,5 +146,3 @@ gstack skills are installed at `.claude/skills/gstack` (from https://github.com/
 **In Cowork / Claude desktop:** gstack slash commands are not registered; follow the loop prompt in [`docs/LOOP_PROMPT.md`](./docs/LOOP_PROMPT.md) instead (Chrome MCP is fine there).
 
 **Verification loop convention:** for any "check the app works" request, follow `docs/LOOP_PROMPT.md` — goal → checks → fix → re-verify → report, max 2 iterations unless told otherwise.
-
-Note: `.claude/skills/gstack/gstack_temp/` (~98 MB leftover clone) should be deleted manually — safe to remove.
